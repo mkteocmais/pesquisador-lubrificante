@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisador de Lubrificante</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .navy-blue { background-color: #002B5C; }
+        .red-accent { background-color: #E30613; }
+        .text-navy { color: #002B5C; }
+        .btn-active { border: 3px solid #E30613 !important; background-color: #002B5C !important; color: white !important; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col bg-white shadow-2xl relative">
+        
+        <!-- HEADER -->
+        <header class="navy-blue p-5 text-center border-b-4 border-red-600">
+            <h1 class="text-white text-xl font-black uppercase italic tracking-tighter">
+                Pesquisador de <span class="text-red-600">Lubrificante</span>
+            </h1>
+        </header>
+
+        <main class="flex-1 flex flex-col p-6">
+            <!-- TELA 1: HOME -->
+            <div id="screen-home" class="flex-1 flex flex-col justify-center space-y-6">
+                <input type="file" accept="image/*" capture="camera" id="cameraInput" class="hidden" onchange="handlePhoto(this)">
+                <button onclick="document.getElementById('cameraInput').click()" class="w-full navy-blue p-6 rounded-2xl flex items-center gap-4 text-white shadow-lg active:scale-95 transition-all">
+                    <span class="text-3xl">📸</span>
+                    <div class="text-left"><p class="font-bold uppercase">Tirar Foto / Scanner</p></div>
+                </button>
+                <button onclick="showForm()" class="w-full red-accent p-6 rounded-2xl flex items-center gap-4 text-white shadow-lg active:scale-95 transition-all">
+                    <span class="text-3xl">⌨️</span>
+                    <div class="text-left"><p class="font-bold uppercase">Inserção Manual</p></div>
+                </button>
+            </div>
+
+            <!-- TELA DE PREVIEW DA FOTO -->
+            <div id="screen-photo-preview" class="hidden space-y-4">
+                <button onclick="resetApp()" class="text-navy font-bold text-xs uppercase">← Voltar</button>
+                <img id="capturedImage" class="w-full h-64 object-cover rounded-2xl border-2 border-gray-200">
+                <button onclick="showForm()" class="w-full navy-blue text-white py-4 rounded-xl font-bold uppercase">Avançar</button>
+            </div>
+
+            <!-- TELA 2: FORMULÁRIO -->
+            <div id="screen-form" class="hidden space-y-4">
+                <button onclick="resetApp()" class="text-navy font-bold text-xs uppercase">← Voltar</button>
+                <input id="marca" type="text" placeholder="Marca" class="w-full p-3 border rounded-lg outline-none focus:border-red-600">
+                <input id="produto" type="text" placeholder="Nome do Produto" class="w-full p-3 border rounded-lg outline-none focus:border-red-600">
+                <input id="viscosidade" type="text" placeholder="Viscosidade" class="w-full p-3 border rounded-lg outline-none focus:border-red-600">
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btnL" onclick="setUnit('Litro')" class="py-3 border-2 rounded-lg font-bold btn-active">LITRO</button>
+                    <button id="btnK" onclick="setUnit('Kilo')" class="py-3 border-2 rounded-lg font-bold border-gray-200 text-gray-400">KILO</button>
+                </div>
+
+                <div class="p-4 bg-gray-50 rounded-2xl border-2 border-navy">
+                    <input id="preco" type="number" step="0.01" placeholder="Preço R$ 0,00" class="w-full bg-transparent text-center text-4xl font-black text-navy outline-none">
+                </div>
+
+                <button id="btnSalvar" onclick="sendToGoogle()" class="w-full navy-blue text-white py-4 rounded-xl font-bold uppercase shadow-lg">Gravar na Planilha</button>
+            </div>
+
+            <!-- TELA 3: SUCESSO -->
+            <div id="screen-success" class="hidden flex-1 flex flex-col items-center justify-center text-center">
+                <div class="text-6xl mb-4">✅</div>
+                <h2 class="text-2xl font-black text-navy uppercase italic">Enviado!</h2>
+                <button onclick="resetApp()" class="mt-8 w-full navy-blue text-white py-4 rounded-xl font-bold">Nova Pesquisa</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let selectedUnit = 'Litro';
+        let fotoBase64 = "";
+        const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbzSoQKRsDqh_CYpNyYvbmldk8k8hIJ71Xg-Gyd28ib-A8c8DgDVzlE0lg53oKO1Y2YfIw/exec"; // <--- URL GOOGLE
+
+        function handlePhoto(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoBase64 = e.target.result;
+                    document.getElementById('capturedImage').src = fotoBase64;
+                    document.getElementById('screen-home').classList.add('hidden');
+                    document.getElementById('screen-photo-preview').classList.remove('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function setUnit(u) {
+            selectedUnit = u;
+            document.getElementById('btnL').className = u === 'Litro' ? 'py-3 border-2 rounded-lg font-bold btn-active' : 'py-3 border-2 rounded-lg font-bold border-gray-200 text-gray-400';
+            document.getElementById('btnK').className = u === 'Kilo' ? 'py-3 border-2 rounded-lg font-bold btn-active' : 'py-3 border-2 rounded-lg font-bold border-gray-200 text-gray-400';
+        }
+
+        function showForm() {
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-photo-preview').classList.add('hidden');
+            document.getElementById('screen-form').classList.remove('hidden');
+        }
+
+        function resetApp() {
+            location.reload();
+        }
+
+        async function sendToGoogle() {
+            const btn = document.getElementById('btnSalvar');
+            btn.innerText = "ENVIANDO...";
+            btn.disabled = true;
+
+            const dados = {
+                marca: document.getElementById('marca').value,
+                produto: document.getElementById('produto').value,
+                viscosidade: document.getElementById('viscosidade').value,
+                unidade: selectedUnit,
+                preco: document.getElementById('preco').value,
+                foto: fotoBase64
+            };
+
+            try {
+                await fetch(GOOGLE_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(dados)
+                });
+                document.getElementById('screen-form').classList.add('hidden');
+                document.getElementById('screen-success').classList.remove('hidden');
+            } catch (e) {
+                alert("Erro ao enviar!");
+                btn.innerText = "GRAVAR NA PLANILHA";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
