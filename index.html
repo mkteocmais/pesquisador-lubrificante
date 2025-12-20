@@ -37,19 +37,19 @@
 
             <!-- TELA 2: FORMULÁRIO -->
             <div id="screen-form" class="hidden space-y-4 pb-10">
-                <button onclick="location.reload()" class="text-navy-blue font-bold text-xs uppercase">← Voltar</button>
+                <button onclick="location.reload()" class="text-blue-900 font-bold text-xs uppercase">← Voltar</button>
                 
                 <div class="space-y-3">
-                    <label class="block text-[10px] font-bold uppercase text-gray-500">Colaborador</label>
+                    <label class="block text-[10px] font-bold uppercase text-gray-500 italic">Colaborador</label>
                     <input id="colaborador" type="text" placeholder="Seu nome" class="w-full p-3 border rounded-lg outline-none focus:border-red-600 shadow-sm">
 
-                    <label class="block text-[10px] font-bold uppercase text-gray-500">Marca</label>
+                    <label class="block text-[10px] font-bold uppercase text-gray-500 italic">Marca</label>
                     <input id="marca" type="text" placeholder="Ex: Mobil, Ipiranga..." class="w-full p-3 border rounded-lg outline-none shadow-sm">
 
-                    <label class="block text-[10px] font-bold uppercase text-gray-500">Nome do Produto</label>
+                    <label class="block text-[10px] font-bold uppercase text-gray-500 italic">Nome do Produto</label>
                     <input id="produto" type="text" placeholder="Ex: Rimula R4" class="w-full p-3 border rounded-lg outline-none shadow-sm">
 
-                    <label class="block text-[10px] font-bold uppercase text-gray-500">Viscosidade</label>
+                    <label class="block text-[10px] font-bold uppercase text-gray-500 italic">Viscosidade</label>
                     <select id="viscosidade" onchange="checkOther(this)" class="w-full p-3 border rounded-lg bg-white shadow-sm outline-none">
                         <option value="">Selecione...</option>
                         <option>0W-16</option><option>0W-20</option><option>0W-30</option><option>0W-40</option>
@@ -60,7 +60,7 @@
                     </select>
                     <input id="visco_outro" type="text" placeholder="Digite a viscosidade" class="hidden w-full p-3 border rounded-lg border-red-600 outline-none mt-2">
 
-                    <label class="block text-[10px] font-bold uppercase text-gray-500">Tipo de Cliente (Venda de -> Para)</label>
+                    <label class="block text-[10px] font-bold uppercase text-gray-500 italic">Fluxo de Venda (De -> Para)</label>
                     <select id="tipo_cliente" class="w-full p-3 border rounded-lg bg-white shadow-sm outline-none">
                         <option value="">Selecione o fluxo...</option>
                         <option>Fábrica -> Distribuidor</option>
@@ -69,27 +69,28 @@
                         <option>Revenda -> Consumidor Final</option>
                     </select>
 
-                    <label class="block text-[10px] font-bold uppercase text-gray-500">Unidade</label>
+                    <label class="block text-[10px] font-bold uppercase text-gray-500 italic">Unidade</label>
                     <div class="grid grid-cols-2 gap-2">
                         <button id="btnL" onclick="setUnit('Litro')" class="py-3 border-2 rounded-lg font-bold btn-active">LITRO</button>
                         <button id="btnK" onclick="setUnit('Kilo')" class="py-3 border-2 rounded-lg font-bold border-gray-200 text-gray-400">KILO</button>
                     </div>
 
-                    <div class="p-4 bg-gray-50 rounded-2xl border-2 border-navy-blue mt-4">
-                        <label class="block text-center text-[10px] font-bold uppercase text-navy-blue mb-1">Preço Unitário (R$)</label>
-                        <input id="preco" type="number" step="0.01" placeholder="0,00" class="w-full bg-transparent text-center text-4xl font-black text-navy-blue outline-none">
+                    <div class="p-4 bg-gray-50 rounded-2xl border-2 border-blue-900 mt-4">
+                        <label class="block text-center text-[10px] font-bold uppercase text-blue-900 mb-1">Preço Unitário (R$)</label>
+                        <input id="preco" type="number" step="0.01" placeholder="0,00" class="w-full bg-transparent text-center text-4xl font-black text-blue-900 outline-none">
                     </div>
 
-                    <div id="gps-status" class="text-[10px] text-center text-gray-400 italic">Capturando localização...</div>
+                    <div id="gps-status" class="text-[10px] text-center text-gray-400 italic">📍 Localização Pendente</div>
                 </div>
 
-                <button id="btnSalvar" onclick="sendToGoogle()" class="w-full navy-blue text-white py-5 rounded-xl font-bold uppercase shadow-lg text-lg">Gravar na Planilha</button>
+                <button id="btnSalvar" onclick="sendToGoogle()" class="w-full navy-blue text-white py-5 rounded-xl font-bold uppercase shadow-lg text-lg active:scale-95 transition-all">Gravar na Planilha</button>
             </div>
 
             <!-- TELA SUCESSO -->
             <div id="screen-success" class="hidden flex-1 flex flex-col items-center justify-center text-center">
                 <div class="text-6xl mb-4">✅</div>
-                <h2 class="text-2xl font-black text-navy-blue uppercase">Dados Enviados!</h2>
+                <h2 class="text-2xl font-black text-blue-900 uppercase">Dados Enviados!</h2>
+                <p class="text-gray-500 mt-2">A foto foi salva no Drive e a planilha atualizada.</p>
                 <button onclick="location.reload()" class="mt-8 px-10 py-4 navy-blue text-white rounded-xl font-bold">Nova Pesquisa</button>
             </div>
         </main>
@@ -99,12 +100,15 @@
         let selectedUnit = 'Litro';
         let fotoBase64 = "";
         let latLong = "";
-        const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbzj8sn97dRo6LmCrow_RwOpQAjvUJVD5YSB4UuhAq7MJ33pJ5VHPBk4j6hqmreP1Hvwow/exec";
+        
+        // --- ATENÇÃO: COLE SUA URL ABAIXO ---
+        const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbxHXR2D72cX3Gy1oewePuDAAhGDOlkJZ4vxSB2bJnT2vTjqKsH8UEnvwOtTdfFLFbtgjA/exec";
 
-        // Capturar Localização automaticamente
+        // Capturar GPS
         navigator.geolocation.getCurrentPosition((pos) => {
             latLong = `${pos.coords.latitude}, ${pos.coords.longitude}`;
             document.getElementById('gps-status').innerText = "📍 Localização Capturada";
+            document.getElementById('gps-status').className = "text-[10px] text-center text-green-600 font-bold italic";
         });
 
         function handlePhoto(input) {
@@ -154,11 +158,17 @@
             };
 
             try {
-                await fetch(GOOGLE_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dados) });
+                // Usando fetch com no-cors para evitar problemas de política de segurança simples
+                await fetch(GOOGLE_URL, { 
+                    method: 'POST', 
+                    mode: 'no-cors', 
+                    body: JSON.stringify(dados) 
+                });
+                // Como no-cors não permite ler a resposta, assumimos sucesso se não der erro
                 document.getElementById('screen-form').classList.add('hidden');
                 document.getElementById('screen-success').classList.remove('hidden');
             } catch (e) {
-                alert("Erro ao enviar!");
+                alert("Erro ao enviar! Tente novamente.");
                 btn.innerText = "GRAVAR NA PLANILHA"; btn.disabled = false;
             }
         }
