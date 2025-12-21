@@ -27,50 +27,61 @@
             
             <!-- TELA 1: HOME -->
             <div id="screen-home" class="flex-1 flex flex-col justify-center space-y-6">
-                <!-- Removido 'capture="camera"' para permitir galeria -->
-                <input type="file" accept="image/*" id="cameraInput" class="hidden" onchange="handlePhoto(this)">
                 
-                <button onclick="document.getElementById('cameraInput').click()" class="w-full navy-blue p-8 rounded-2xl flex items-center justify-center gap-4 text-white shadow-lg active:scale-95 transition-all">
-                    <span class="text-4xl">📸</span>
-                    <p class="font-bold uppercase text-lg italic">Tirar Foto ou Galeria</p>
-                </button>
+                <!-- Inputs Escondidos -->
+                <input type="file" accept="image/*" capture="camera" id="cameraInput" class="hidden" onchange="handlePhoto(this)">
+                <input type="file" accept="image/*" id="galleryInput" class="hidden" onchange="handlePhoto(this)">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Botão Câmera -->
+                    <button onclick="document.getElementById('cameraInput').click()" class="navy-blue p-6 rounded-2xl flex flex-col items-center justify-center gap-2 text-white shadow-lg active:scale-95 transition-all">
+                        <span class="text-4xl">📸</span>
+                        <p class="font-bold uppercase text-xs italic">Câmera</p>
+                    </button>
+
+                    <!-- Botão Galeria -->
+                    <button onclick="document.getElementById('galleryInput').click()" class="navy-blue p-6 rounded-2xl flex flex-col items-center justify-center gap-2 text-white shadow-lg active:scale-95 transition-all">
+                        <span class="text-4xl">🖼️</span>
+                        <p class="font-bold uppercase text-xs italic">Galeria</p>
+                    </button>
+                </div>
 
                 <button onclick="showForm()" class="w-full red-accent p-6 rounded-2xl flex items-center justify-center gap-4 text-white shadow-lg active:scale-95 transition-all">
                     <span class="text-3xl">⌨️</span>
-                    <p class="font-bold uppercase italic">Inserção Manual</p>
+                    <p class="font-bold uppercase italic tracking-wider">Inserção Manual</p>
                 </button>
             </div>
 
             <!-- TELA 2: FORMULÁRIO -->
             <div id="screen-form" class="hidden space-y-4 pb-10">
-                <button onclick="location.reload()" class="text-blue-900 font-bold text-xs uppercase italic">← Voltar ao Início</button>
+                <button onclick="location.reload()" class="text-blue-900 font-bold text-[10px] uppercase italic">← Voltar ao Início</button>
                 
                 <div class="space-y-3">
                     <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Colaborador</label>
-                    <input id="colaborador" type="text" placeholder="Seu nome" class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600">
+                    <input id="colaborador" type="text" placeholder="Seu nome" class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600 text-sm">
 
-                    <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Empresa</label>
-                    <input id="empresa" type="text" placeholder="Nome da empresa pesquisada" class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600">
+                    <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Empresa Pesquisada</label>
+                    <input id="empresa" type="text" placeholder="Nome do local/empresa" class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600 text-sm">
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Estado</label>
-                            <input id="estado" type="text" placeholder="Ex: SP" class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600">
+                            <input id="estado" type="text" placeholder="Ex: SP" class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600 text-sm">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Cidade</label>
-                            <input id="cidade" type="text" placeholder="Cidade" class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600">
+                            <input id="cidade" type="text" placeholder="Cidade" class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600 text-sm">
                         </div>
                     </div>
 
                     <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Marca do Produto</label>
-                    <input id="marca" type="text" placeholder="Ex: Mobil, Shell..." class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600">
+                    <input id="marca" type="text" placeholder="Ex: Mobil, Shell, Ipiranga..." class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600 text-sm">
 
                     <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Nome do Produto</label>
-                    <input id="produto" type="text" placeholder="Ex: Rimula R4" class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600">
+                    <input id="produto" type="text" placeholder="Ex: Rimula R4, Delvac..." class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600 text-sm">
 
                     <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Viscosidade</label>
-                    <select id="viscosidade" onchange="checkOther(this)" class="w-full p-3 border rounded-lg bg-white shadow-sm outline-none">
+                    <select id="viscosidade" onchange="checkOther(this)" class="w-full p-3 border rounded-lg bg-white shadow-sm outline-none text-sm">
                         <option value="">Selecione...</option>
                         <option>0W-16</option><option>0W-20</option><option>0W-30</option><option>0W-40</option>
                         <option>5W-20</option><option>5W-30</option><option>5W-40</option>
@@ -78,7 +89,7 @@
                         <option>SAE 30</option><option>SAE 40</option><option>SAE 90</option><option>SAE 140</option>
                         <option value="Outro">Outro (Digitar)</option>
                     </select>
-                    <input id="visco_outro" type="text" placeholder="Digite a viscosidade" class="hidden w-full p-3 border rounded-lg border-red-600 outline-none mt-2">
+                    <input id="visco_outro" type="text" placeholder="Digite a viscosidade" class="hidden w-full p-3 border rounded-lg border-red-600 outline-none mt-2 text-sm">
 
                     <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Fluxo de Venda (De -> Para)</label>
                     <select id="tipo_cliente" class="w-full p-3 border rounded-lg bg-white shadow-sm outline-none text-sm">
@@ -91,12 +102,12 @@
 
                     <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Unidade</label>
                     <div class="grid grid-cols-2 gap-2">
-                        <button id="btnL" onclick="setUnit('Litro')" class="py-3 border-2 rounded-lg font-bold btn-active">LITRO</button>
-                        <button id="btnK" onclick="setUnit('Kilo')" class="py-3 border-2 rounded-lg font-bold border-gray-200 text-gray-400">KILO</button>
+                        <button id="btnL" onclick="setUnit('Litro')" class="py-3 border-2 rounded-lg font-bold btn-active text-sm">LITRO</button>
+                        <button id="btnK" onclick="setUnit('Kilo')" class="py-3 border-2 rounded-lg font-bold border-gray-200 text-gray-400 text-sm">KILO</button>
                     </div>
 
-                    <div class="p-4 bg-gray-50 rounded-2xl border-2 border-blue-900 mt-4 shadow-inner">
-                        <label class="block text-center text-[10px] font-bold uppercase text-blue-900 mb-1 italic">Preço Unitário (R$)</label>
+                    <div class="p-4 bg-gray-50 rounded-2xl border-2 border-blue-900 mt-4 shadow-inner text-center">
+                        <label class="block text-[10px] font-bold uppercase text-blue-900 mb-1 italic">Preço Unitário (R$)</label>
                         <div class="flex items-center justify-center">
                             <span class="text-2xl font-black text-blue-900 mr-1 italic">R$</span>
                             <input id="preco" type="number" step="0.01" placeholder="0,00" class="w-full bg-transparent text-center text-4xl font-black text-blue-900 outline-none">
@@ -108,7 +119,6 @@
 
                 <button id="btnSalvar" onclick="uploadAndSave()" class="w-full navy-blue text-white py-5 rounded-xl font-bold uppercase shadow-lg text-lg active:scale-95 transition-all">Gravar no Sistema</button>
                 
-                <!-- RODAPÉ SOLICITADO -->
                 <p class="text-center text-[10px] font-bold uppercase text-gray-400 tracking-widest mt-4">
                     Marketing - Inteligência de Mercado
                 </p>
@@ -132,7 +142,7 @@
         let fotoFile = null;
         let latLong = "";
 
-        // Captura GPS e tenta Cidade/Estado
+        // Geolocalização Reversa
         navigator.geolocation.getCurrentPosition(async (pos) => {
             latLong = `${pos.coords.latitude}, ${pos.coords.longitude}`;
             try {
@@ -199,7 +209,7 @@
                     viscosidade: viscoFinal,
                     cliente: document.getElementById('tipo_cliente').value,
                     unidade: selectedUnit,
-                    preco: parseFloat(document.getElementById('preco').value),
+                    preco: parseFloat(document.getElementById('preco').value) || 0,
                     localizacao: latLong,
                     foto_url: finalUrl
                 }]);
