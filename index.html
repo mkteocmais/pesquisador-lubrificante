@@ -27,19 +27,14 @@
             
             <!-- TELA 1: HOME -->
             <div id="screen-home" class="flex-1 flex flex-col justify-center space-y-6">
-                
-                <!-- Inputs Escondidos -->
                 <input type="file" accept="image/*" capture="camera" id="cameraInput" class="hidden" onchange="handlePhoto(this)">
                 <input type="file" accept="image/*" id="galleryInput" class="hidden" onchange="handlePhoto(this)">
                 
                 <div class="grid grid-cols-2 gap-4">
-                    <!-- Botão Câmera -->
                     <button onclick="document.getElementById('cameraInput').click()" class="navy-blue p-6 rounded-2xl flex flex-col items-center justify-center gap-2 text-white shadow-lg active:scale-95 transition-all">
                         <span class="text-4xl">📸</span>
                         <p class="font-bold uppercase text-xs italic">Câmera</p>
                     </button>
-
-                    <!-- Botão Galeria -->
                     <button onclick="document.getElementById('galleryInput').click()" class="navy-blue p-6 rounded-2xl flex flex-col items-center justify-center gap-2 text-white shadow-lg active:scale-95 transition-all">
                         <span class="text-4xl">🖼️</span>
                         <p class="font-bold uppercase text-xs italic">Galeria</p>
@@ -81,7 +76,7 @@
                     <input id="produto" type="text" placeholder="Ex: Rimula R4, Delvac..." class="w-full p-3 border rounded-lg shadow-sm outline-none focus:border-red-600 text-sm">
 
                     <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Viscosidade</label>
-                    <select id="viscosidade" onchange="checkOther(this)" class="w-full p-3 border rounded-lg bg-white shadow-sm outline-none text-sm">
+                    <select id="viscosidade" onchange="checkOther(this, 'visco_outro')" class="w-full p-3 border rounded-lg bg-white shadow-sm outline-none text-sm">
                         <option value="">Selecione...</option>
                         <option>0W-16</option><option>0W-20</option><option>0W-30</option><option>0W-40</option>
                         <option>5W-20</option><option>5W-30</option><option>5W-40</option>
@@ -100,14 +95,44 @@
                         <option>Revenda -> Consumidor Final</option>
                     </select>
 
-                    <label class="block text-[10px] font-bold uppercase text-gray-400 italic">Unidade</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="btnL" onclick="setUnit('Litro')" class="py-3 border-2 rounded-lg font-bold btn-active text-sm">LITRO</button>
-                        <button id="btnK" onclick="setUnit('Kilo')" class="py-3 border-2 rounded-lg font-bold border-gray-200 text-gray-400 text-sm">KILO</button>
-                    </div>
+                    <label class="block text-[10px] font-bold uppercase text-gray-400 italic">SKU Pesquisado</label>
+                    <select id="sku" onchange="checkOther(this, 'sku_outro')" class="w-full p-3 border rounded-lg bg-white shadow-sm outline-none text-sm">
+                        <option value="">Selecione o SKU...</option>
+                        <option>Bisnaga 0,08kg</option>
+                        <option>Frasco 0,1L</option>
+                        <option>Frasco 0,2L</option>
+                        <option>Pote 0,5Kg</option>
+                        <option>Frasco 0,9L</option>
+                        <option>Pote 1Kg</option>
+                        <option>Frasco 1L</option>
+                        <option>Granel</option>
+                        <option>Bisnaga 1,5kg</option>
+                        <option>Bombona 4L</option>
+                        <option>Bombona 5L</option>
+                        <option>Caixa Frascos 60x0,1L</option>
+                        <option>Caixa Sachês 100x0,08Kg</option>
+                        <option>Caixa Frascos 48x0,2L</option>
+                        <option>Balde 10Kg</option>
+                        <option>Caixa Frascos 12x0,9L</option>
+                        <option>Caixa Frascos 12x1L</option>
+                        <option>Caixa Bombonas 4x4L</option>
+                        <option>Caixa Potes 36x0,5Kg</option>
+                        <option>Bombona 19L</option>
+                        <option>Balde 20Kg</option>
+                        <option>Bombona 20L</option>
+                        <option>Caixa Bombonas 4x5L</option>
+                        <option>Caixa Sachês 16x1,5Kg</option>
+                        <option>Caixa Potes 24x1Kg</option>
+                        <option>Tamborete 60L</option>
+                        <option>Tambor 170Kg</option>
+                        <option>Tambor 200L</option>
+                        <option>Container 1000L</option>
+                        <option value="Outro">Outros (Digitar)</option>
+                    </select>
+                    <input id="sku_outro" type="text" placeholder="Descreva o SKU" class="hidden w-full p-3 border rounded-lg border-red-600 outline-none mt-2 text-sm">
 
                     <div class="p-4 bg-gray-50 rounded-2xl border-2 border-blue-900 mt-4 shadow-inner text-center">
-                        <label class="block text-[10px] font-bold uppercase text-blue-900 mb-1 italic">Preço Unitário (R$)</label>
+                        <label class="block text-[10px] font-bold uppercase text-blue-900 mb-1 italic">Preço Pesquisado (R$)</label>
                         <div class="flex items-center justify-center">
                             <span class="text-2xl font-black text-blue-900 mr-1 italic">R$</span>
                             <input id="preco" type="number" step="0.01" placeholder="0,00" class="w-full bg-transparent text-center text-4xl font-black text-blue-900 outline-none">
@@ -119,7 +144,7 @@
 
                 <button id="btnSalvar" onclick="uploadAndSave()" class="w-full navy-blue text-white py-5 rounded-xl font-bold uppercase shadow-lg text-lg active:scale-95 transition-all">Gravar no Sistema</button>
                 
-                <p class="text-center text-[10px] font-bold uppercase text-gray-400 tracking-widest mt-4">
+                <p class="text-center text-[10px] font-bold uppercase text-gray-400 tracking-widest mt-4 italic">
                     Marketing - Inteligência de Mercado
                 </p>
             </div>
@@ -138,11 +163,10 @@
         const SUPABASE_KEY = "sb_publishable_Yp-LdHAENWBZByTStXKjnw_iN41jrm3";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let selectedUnit = 'Litro';
         let fotoFile = null;
         let latLong = "";
 
-        // Geolocalização Reversa
+        // Geolocalização
         navigator.geolocation.getCurrentPosition(async (pos) => {
             latLong = `${pos.coords.latitude}, ${pos.coords.longitude}`;
             try {
@@ -154,7 +178,7 @@
                     document.getElementById('gps-info').innerText = "📍 Localização Detectada";
                 }
             } catch (e) { 
-                document.getElementById('gps-info').innerText = "📍 GPS Ativo (Cidade/Estado Manual)";
+                document.getElementById('gps-info').innerText = "📍 GPS Ativo";
             }
         });
 
@@ -165,15 +189,10 @@
             }
         }
 
-        function checkOther(select) {
-            const inputOutro = document.getElementById('visco_outro');
+        // Função genérica para tratar o "Outro"
+        function checkOther(select, targetId) {
+            const inputOutro = document.getElementById(targetId);
             inputOutro.classList.toggle('hidden', select.value !== 'Outro');
-        }
-
-        function setUnit(u) {
-            selectedUnit = u;
-            document.getElementById('btnL').className = u === 'Litro' ? 'py-3 border-2 rounded-lg font-bold btn-active' : 'py-3 border-2 rounded-lg font-bold border-gray-200 text-gray-400';
-            document.getElementById('btnK').className = u === 'Kilo' ? 'py-3 border-2 rounded-lg font-bold btn-active' : 'py-3 border-2 rounded-lg font-bold border-gray-200 text-gray-400';
         }
 
         function showForm() {
@@ -199,6 +218,9 @@
                 let viscoFinal = document.getElementById('viscosidade').value;
                 if(viscoFinal === "Outro") viscoFinal = document.getElementById('visco_outro').value;
 
+                let skuFinal = document.getElementById('sku').value;
+                if(skuFinal === "Outro") skuFinal = document.getElementById('sku_outro').value;
+
                 const { error: dbError } = await _supabase.from('lubricants').insert([{
                     colaborador: document.getElementById('colaborador').value,
                     empresa: document.getElementById('empresa').value,
@@ -208,7 +230,7 @@
                     produto: document.getElementById('produto').value,
                     viscosidade: viscoFinal,
                     cliente: document.getElementById('tipo_cliente').value,
-                    unidade: selectedUnit,
+                    sku: skuFinal,
                     preco: parseFloat(document.getElementById('preco').value) || 0,
                     localizacao: latLong,
                     foto_url: finalUrl
