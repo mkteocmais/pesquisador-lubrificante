@@ -165,7 +165,7 @@ const STYLES =
   `<numFmts count="3"><numFmt numFmtId="164" formatCode="dd/mm/yyyy hh:mm"/><numFmt numFmtId="165" formatCode="&quot;R$&quot; #,##0.00"/><numFmt numFmtId="166" formatCode="#,##0.00"/></numFmts>` +
   `<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts>` +
   `<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>` +
-  `<fill><patternFill patternType="solid"><fgColor rgb="FF002B5C"/><bgColor indexed="64"/></patternFill></fill></fills>` +
+  `<fill><patternFill patternType="solid"><fgColor rgb="FF003CA6"/><bgColor indexed="64"/></patternFill></fill></fills>` +
   `<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>` +
   `<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>` +
   `<cellXfs count="5">` +

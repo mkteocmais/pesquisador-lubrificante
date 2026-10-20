@@ -38,7 +38,7 @@ export function Modal({ onClose, title, children, onSubmit, wide }: ModalProps) 
   return (
     <div className="fixed inset-0 z-[999] flex items-end md:items-center justify-center md:p-4" role="dialog" aria-modal="true" aria-label={title}>
       <div className="absolute inset-0 bg-[#101828]/40 backdrop-blur-md animate-in fade-in duration-200" onClick={onClose} />
-      <div className={`relative bg-surface w-full ${wide ? "md:max-w-3xl" : "md:max-w-lg"} rounded-t-3xl md:rounded-3xl px-6 pt-4 pb-safe md:p-10 overflow-y-auto max-h-[92vh] md:max-h-[90vh] animate-in slide-in-from-bottom md:zoom-in-95 duration-200`}>
+      <div className={`relative bg-surface w-full ${wide ? "md:max-w-3xl" : "md:max-w-lg"} rounded-t-xl md:rounded-lg px-6 pt-4 pb-safe md:p-10 overflow-y-auto max-h-[92vh] md:max-h-[90vh] animate-in slide-in-from-bottom md:zoom-in-95 duration-200`}>
         <div className="w-10 h-1.5 bg-line rounded-full mx-auto mb-3 md:hidden" />
         <button
           onClick={onClose}

@@ -83,7 +83,7 @@ export function SuggestInput({ value, onChange, options, placeholder, className 
           id={listId}
           role="listbox"
           // 5 linhas de 44px; o resto rola dentro da caixa.
-          className="absolute top-full left-0 right-0 mt-1.5 z-[100] max-h-[220px] overflow-y-auto overscroll-contain bg-surface border border-line rounded-xl divide-y divide-line"
+          className="absolute top-full left-0 right-0 mt-1.5 z-[100] max-h-[220px] overflow-y-auto overscroll-contain bg-surface border border-line rounded-md divide-y divide-line"
         >
           {filtered.map((o, i) => (
             <li key={o} role="option" aria-selected={i === active}>

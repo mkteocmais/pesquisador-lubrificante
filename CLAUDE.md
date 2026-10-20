@@ -69,7 +69,9 @@ supabase/pendentes/           SQL que só deve virar migração depois de um pas
 
 - Iguais às do Juntto: componentes funcionais, sem bibliotecas novas sem necessidade, `autoComplete="off"` nos campos, `placeholder` em vez de valor de exemplo, `inputMode="decimal"` em valores.
 - Erros sempre via `useToast()` com `mensagemErro()`; nunca mostre o erro cru do Supabase.
-- Cores: marca azul-marinho `#002B5C` (`brand`), destaque vermelho `#E30613` (`accent`, usado com moderação). Tokens em `tailwind.config.js` e `src/utils/theme.ts`.
+- **Identidade da Evora Lubrificantes** (evoralub.com.br): azul Evora `#003CA6` (`brand`, escuro `#002971`), vermelho Evora `#BA1928` (`accent`, só em marcadores e destaques), texto grafite `#131E25`. Tokens em `tailwind.config.js` e `src/utils/theme.ts`.
+- Fontes do site, servidas pelo app via `@fontsource`: Roboto (texto), Open Sans 800 em caixa alta (títulos, `font-titulo`) e Roboto Condensed espaçada (sobretítulos, `font-condensado`). Cantos quase retos (`rounded-md`/`rounded-lg`).
+- Logo, escudo e ícones em `public/` (`evora-logo.svg`, `evora-logo-branco.png`, `evora-escudo.svg`); componentes de marca em `components/common/Marca.tsx` (`Logo`, `Sobretitulo`, `Divisor`, `TituloPagina`).
 - Mobile first (a partir de 360px). O Painel é pensado para o computador, mas funciona no celular.
 - Comentários em português, explicando o **porquê**.
 

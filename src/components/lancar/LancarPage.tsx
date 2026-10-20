@@ -3,6 +3,7 @@ import { CheckCircle2 } from "lucide-react";
 import type { Concorrente, Lancamento, Perfil, Produto } from "../../types";
 import { formatBRL } from "../../utils/format";
 import { theme, textStyles } from "../../utils/theme";
+import { TituloPagina } from "../common/Marca";
 import { DevolutivaCard } from "./DevolutivaCard";
 import { LancamentoForm, LocalPesquisa } from "./LancamentoForm";
 
@@ -57,10 +58,9 @@ export function LancarPage({ perfil, produtos, concorrentes, onSalvo, onVerMeus 
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className={textStyles.h1}>Lançar preço</h1>
-        <p className="text-sm text-muted">Olá, {perfil.nome?.split(" ")[0]}. Preencha o que você pesquisou.</p>
-      </div>
+      <TituloPagina sobre={`Olá, ${perfil.nome?.split(" ")[0] ?? ""}`} titulo="Lançar preço">
+        <p className="text-sm text-muted pt-1">Preencha o que você pesquisou.</p>
+      </TituloPagina>
       <LancamentoForm
         key={rodada}
         perfil={perfil}

@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
       return (
         <div className="min-h-screen bg-brand flex items-center justify-center p-8 text-center text-white">
           <div className="max-w-md w-full">
-            <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-rose-500/10 rounded-lg flex items-center justify-center mx-auto mb-6">
               <AlertOctagon className="text-rose-500" size={32} />
             </div>
             <h1 className="text-xl font-semibold tracking-tight mb-2">Algo deu errado</h1>
@@ -42,7 +42,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             </p>
             <button
               onClick={this.handleReload}
-              className="bg-[#002B5C] text-white py-4 px-8 rounded-xl font-semibold text-xs"
+              className="bg-[#002B5C] text-white py-4 px-8 rounded-md font-semibold text-xs"
             >
               Recarregar
             </button>

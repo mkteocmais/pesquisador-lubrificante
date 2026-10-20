@@ -4,6 +4,7 @@ import type { Concorrente, Lancamento, Perfil, Produto } from "../../types";
 import { chaveTexto, formatBRL, formatData } from "../../utils/format";
 import { theme, textStyles } from "../../utils/theme";
 import { EmptyState } from "../common/EmptyState";
+import { TituloPagina } from "../common/Marca";
 import { LancamentoDetalhe } from "./LancamentoDetalhe";
 
 interface Props {
@@ -85,7 +86,7 @@ export function MeusPrecosPage({ perfil, produtos, concorrentes, lancamentos, on
 
   return (
     <div className="space-y-5">
-      <h1 className={textStyles.h1}>Meus preços</h1>
+      <TituloPagina sobre="Histórico" titulo="Meus preços" />
 
       <div className="grid grid-cols-3 gap-3">
         {[
@@ -93,7 +94,7 @@ export function MeusPrecosPage({ perfil, produtos, concorrentes, lancamentos, on
           ["No total", resumo.total],
           ["Com equivalente", resumo.total ? `${Math.round((resumo.comEquiv / resumo.total) * 100)}%` : "—"],
         ].map(([k, v]) => (
-          <div key={k} className="bg-surface border border-line rounded-2xl p-3">
+          <div key={k} className="bg-surface border border-line rounded-lg p-3">
             <p className="text-xs text-muted">{k}</p>
             <p className="text-xl font-semibold text-ink tabular-nums">{v}</p>
           </div>
@@ -105,7 +106,7 @@ export function MeusPrecosPage({ perfil, produtos, concorrentes, lancamentos, on
           title="Nenhum preço lançado ainda"
           description="Os preços que você lançar aparecem aqui, com a comparação com o mercado."
           action={
-            <button onClick={onLancar} className="bg-brand text-white px-6 py-3 rounded-xl text-sm font-semibold">
+            <button onClick={onLancar} className="bg-brand text-white px-6 py-3 rounded-md text-sm font-semibold">
               Lançar o primeiro
             </button>
           }
@@ -147,7 +148,7 @@ export function MeusPrecosPage({ perfil, produtos, concorrentes, lancamentos, on
           {filtrados.length === 0 ? (
             <EmptyState title="Nada encontrado" description="Tente outro período ou outra busca." />
           ) : (
-            <ul className="bg-surface border border-line rounded-2xl divide-y divide-line overflow-hidden">
+            <ul className="bg-surface border border-line rounded-lg divide-y divide-line overflow-hidden">
               {filtrados.map((l) => (
                 <LancamentoItem
                   key={l.id}

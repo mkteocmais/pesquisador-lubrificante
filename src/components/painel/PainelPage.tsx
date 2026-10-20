@@ -5,6 +5,7 @@ import { carregarPerfis, todosLancamentos } from "../../lib/api";
 import { mensagemErro } from "../../utils/erros";
 import { textStyles } from "../../utils/theme";
 import { useToast } from "../common/ToastProvider";
+import { TituloPagina } from "../common/Marca";
 import { EquivalenciasAdmin } from "./EquivalenciasAdmin";
 import { LancamentosAdmin } from "./LancamentosAdmin";
 import { VendedoresAdmin } from "./VendedoresAdmin";
@@ -77,17 +78,17 @@ export function PainelPage({ perfil, produtos, concorrentes }: Props) {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className={textStyles.h1}>Painel</h1>
+      <div className="flex items-end justify-between gap-3">
+        <TituloPagina sobre="Administrador" titulo="Painel" />
         <button
           onClick={recarregar}
           disabled={carregando}
-          className="flex items-center gap-2 text-sm font-semibold text-brand-ink px-3 py-2 rounded-xl hover:bg-brand-soft"
+          className="flex items-center gap-2 text-sm font-semibold text-brand-ink px-3 py-2 rounded-md hover:bg-brand-soft"
         >
           <RefreshCw size={16} className={carregando ? "animate-spin" : ""} /> Atualizar
         </button>
       </div>
-      <div className="flex gap-1 bg-sunken p-1 rounded-xl w-full md:w-fit overflow-x-auto no-scrollbar">
+      <div className="flex gap-1 bg-sunken p-1 rounded-md w-full md:w-fit overflow-x-auto no-scrollbar">
         {abas.map(([k, rotulo]) => (
           <button
             key={k}

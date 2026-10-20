@@ -49,7 +49,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`flex items-start gap-3 p-4 rounded-2xl border animate-in slide-in-from-bottom-2 duration-200 ${
+            className={`flex items-start gap-3 p-4 rounded-lg border animate-in slide-in-from-bottom-2 duration-200 ${
               t.type === "error"
                 ? "bg-rose-50 border-rose-200 text-rose-700"
                 : "bg-emerald-50 border-emerald-200 text-emerald-700"

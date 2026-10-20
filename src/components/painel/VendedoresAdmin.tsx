@@ -67,7 +67,7 @@ export function VendedoresAdmin({ dados, perfil, onAlterados, onPerfisAlterados 
 
   return (
     <div className="space-y-6">
-      <div className="bg-brand-soft text-brand-ink rounded-2xl p-4 flex gap-3 text-sm">
+      <div className="bg-brand-soft text-brand-ink rounded-lg p-4 flex gap-3 text-sm">
         <Info size={18} className="shrink-0 mt-0.5" />
         <p>
           Para criar um acesso: no Supabase, abra <b>Authentication → Users → Add user → Create new user</b>, informe e-mail e senha e marque{" "}
@@ -77,7 +77,7 @@ export function VendedoresAdmin({ dados, perfil, onAlterados, onPerfisAlterados 
 
       <section className="space-y-3">
         <h2 className="text-[17px] font-semibold text-ink">Acessos ({perfis.length})</h2>
-        <ul className="bg-surface border border-line rounded-2xl divide-y divide-line overflow-hidden">
+        <ul className="bg-surface border border-line rounded-lg divide-y divide-line overflow-hidden">
           {perfis.map((p) => {
             const r = porVendedor.get(p.id);
             return (
@@ -93,7 +93,7 @@ export function VendedoresAdmin({ dados, perfil, onAlterados, onPerfisAlterados 
                     {p.estado && ` · ${p.estado}`} · {r ? `${r.n} lançamentos, último em ${formatData(r.ultimo)}` : "nenhum lançamento"}
                   </p>
                 </div>
-                <button onClick={() => setEditando(p)} aria-label={`Editar ${p.nome || p.email}`} className="p-2.5 rounded-xl text-brand-ink hover:bg-brand-soft">
+                <button onClick={() => setEditando(p)} aria-label={`Editar ${p.nome || p.email}`} className="p-2.5 rounded-md text-brand-ink hover:bg-brand-soft">
                   <Pencil size={18} />
                 </button>
               </li>
@@ -110,7 +110,7 @@ export function VendedoresAdmin({ dados, perfil, onAlterados, onPerfisAlterados 
               Feitos antes do login, só com o nome digitado. Atribua ao vendedor para eles aparecerem em "Meus preços" dele.
             </p>
           </div>
-          <ul className="bg-surface border border-line rounded-2xl divide-y divide-line overflow-hidden">
+          <ul className="bg-surface border border-line rounded-lg divide-y divide-line overflow-hidden">
             {legado.map((g) => (
               <li key={g.nome} className="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2">
                 <p className="flex-1 text-[15px] text-ink">

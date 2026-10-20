@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { theme } from "../../utils/theme";
+import { Divisor, Logo, Sobretitulo } from "../common/Marca";
 
 // Depois de 5 tentativas erradas seguidas, espera 30s antes de tentar de novo
 // (o Supabase também limita no servidor; isso só evita insistência na tela).
@@ -61,20 +62,18 @@ export function AuthScreen() {
 
   return (
     <div className="min-h-screen bg-page text-ink flex flex-col md:flex-row font-sans">
-      <div className="relative flex-1 md:flex-[1.1] min-h-[36vh] md:min-h-screen overflow-hidden bg-brand">
-        <div className="absolute -top-24 -left-20 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full bg-accent/30 blur-3xl" />
+      {/* Painel da marca no degradê azul do site da Evora (no celular ocupa o
+          topo; no computador vira a coluna da esquerda). */}
+      <div className="relative flex-1 md:flex-[1.1] min-h-[40vh] md:min-h-screen overflow-hidden bg-gradient-to-b from-brand-dark to-[#0A3CA6]">
         <div className="relative h-full flex flex-col justify-between p-6 md:p-12 pt-[max(env(safe-area-inset-top),1.5rem)] text-white">
-          <span className="text-sm font-semibold tracking-wide">
-            PESQUISADOR DE <span className="text-accent">LUBRIFICANTE</span>
-          </span>
-          <div className="py-10 md:py-0 max-w-md">
-            <h1 className="text-[32px] md:text-5xl font-semibold leading-[1.05] tracking-tight">
-              O preço do mercado,
-              <br />
-              <span className="text-brand-light">na palma da mão.</span>
+          <Logo branco className="h-24 md:h-36 w-auto self-start" />
+          <div className="py-8 md:py-0 max-w-md space-y-3">
+            <Sobretitulo className="text-white/70">Pesquisa de preços</Sobretitulo>
+            <h1 className="font-titulo text-[28px] md:text-[40px] font-extrabold uppercase leading-[1.15]">
+              O preço do mercado na palma da mão!
             </h1>
-            <p className="mt-4 text-sm md:text-base text-white/75 max-w-sm">
+            <Divisor />
+            <p className="pt-2 text-sm md:text-base text-white/80 max-w-sm">
               Lance os preços que você pesquisa e veja na hora como eles se comparam com o mercado.
             </p>
           </div>
@@ -83,18 +82,18 @@ export function AuthScreen() {
       </div>
 
       <div className="relative md:flex-1 md:flex md:items-center md:justify-center">
-        <div className="relative -mt-8 md:mt-0 bg-surface rounded-t-[32px] md:rounded-2xl md:border md:border-line px-6 pt-7 pb-[max(env(safe-area-inset-bottom),1.5rem)] md:p-10 w-full md:max-w-md animate-in slide-in-from-bottom-4 duration-500">
-          <h2 className="text-xl font-semibold">Entrar</h2>
+        <div className="relative -mt-8 md:mt-0 bg-surface rounded-t-xl md:rounded-lg md:border md:border-line px-6 pt-7 pb-[max(env(safe-area-inset-bottom),1.5rem)] md:p-10 w-full md:max-w-md animate-in slide-in-from-bottom-4 duration-500">
+          <h2 className="font-titulo text-xl font-extrabold uppercase">Entrar</h2>
           <p className="text-sm text-muted mt-1">Use o e-mail e a senha que você recebeu.</p>
 
           <form onSubmit={handleLogin} className="space-y-4 mt-6" noValidate>
             {authError && (
-              <div role="alert" className="bg-rose-500/10 border border-rose-500/20 p-3.5 rounded-2xl flex items-start gap-2.5 text-rose-600">
+              <div role="alert" className="bg-rose-500/10 border border-rose-500/20 p-3.5 rounded-lg flex items-start gap-2.5 text-rose-600">
                 <AlertCircle size={18} className="shrink-0 mt-px" />
                 <p className="text-sm font-medium">{authError}</p>
               </div>
             )}
-            {aviso && <p className="bg-brand-soft text-brand-ink p-3.5 rounded-2xl text-sm">{aviso}</p>}
+            {aviso && <p className="bg-brand-soft text-brand-ink p-3.5 rounded-lg text-sm">{aviso}</p>}
             <div className="space-y-1.5">
               <label htmlFor="auth-email" className="text-xs font-semibold text-slate-600 ml-1">
                 E-mail

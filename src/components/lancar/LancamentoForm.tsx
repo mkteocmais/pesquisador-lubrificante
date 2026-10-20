@@ -185,7 +185,7 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => setFoto(e.target.files?.[0] ?? null)} />
         <input ref={galeriaRef} type="file" accept="image/*" className="hidden" onChange={(e) => setFoto(e.target.files?.[0] ?? null)} />
         {fotoAtual ? (
-          <div className="relative rounded-2xl overflow-hidden border border-line bg-sunken">
+          <div className="relative rounded-lg overflow-hidden border border-line bg-sunken">
             <img src={fotoAtual} alt="Foto do produto pesquisado" className="w-full max-h-64 object-contain" />
             {foto && (
               <button
@@ -207,11 +207,11 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <button type="button" onClick={() => cameraRef.current?.click()} className="bg-brand text-white rounded-2xl py-5 flex flex-col items-center gap-2 active:scale-[0.98] transition-all">
+            <button type="button" onClick={() => cameraRef.current?.click()} className="bg-brand text-white rounded-lg py-5 flex flex-col items-center gap-2 active:scale-[0.98] transition-all">
               <Camera size={26} />
               <span className="text-sm font-semibold">Câmera</span>
             </button>
-            <button type="button" onClick={() => galeriaRef.current?.click()} className="bg-brand-soft text-brand-ink rounded-2xl py-5 flex flex-col items-center gap-2 active:scale-[0.98] transition-all">
+            <button type="button" onClick={() => galeriaRef.current?.click()} className="bg-brand-soft text-brand-ink rounded-lg py-5 flex flex-col items-center gap-2 active:scale-[0.98] transition-all">
               <ImageIcon size={26} />
               <span className="text-sm font-semibold">Galeria</span>
             </button>
@@ -321,7 +321,7 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
             <input autoComplete="off" className={theme.input + " mt-2"} placeholder="Descreva a embalagem" aria-label="Outra embalagem" value={embOutro} onChange={(e) => setEmbOutro(e.target.value)} maxLength={80} />
           )}
         </Campo>
-        <div className={`rounded-2xl border-2 p-4 text-center ${tentou && !(precoNum > 0) ? "border-rose-400" : "border-brand"} bg-brand-soft/40`}>
+        <div className={`rounded-lg border-2 p-4 text-center ${tentou && !(precoNum > 0) ? "border-rose-400" : "border-brand"} bg-brand-soft/40`}>
           <label htmlFor="f-preco" className="text-[13px] font-medium text-brand-ink">
             Preço pesquisado da embalagem
           </label>

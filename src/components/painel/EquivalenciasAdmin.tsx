@@ -56,7 +56,7 @@ export function EquivalenciasAdmin({ dados, produtos, onAlterados }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-surface border border-line rounded-2xl p-4 space-y-3">
+      <div className="bg-surface border border-line rounded-lg p-4 space-y-3">
         <p className="text-sm text-muted">
           {grupos.length} produtos de concorrentes pesquisados · <span className="text-amber-700">{semVinculo} com lançamentos sem equivalente</span>
         </p>
@@ -80,7 +80,7 @@ export function EquivalenciasAdmin({ dados, produtos, onAlterados }: Props) {
       {filtrados.length === 0 ? (
         <EmptyState title="Nada encontrado" />
       ) : (
-        <ul className="bg-surface border border-line rounded-2xl divide-y divide-line overflow-hidden">
+        <ul className="bg-surface border border-line rounded-lg divide-y divide-line overflow-hidden">
           {filtrados.slice(0, 400).map((g) => (
             <li key={g.chave} className="px-4 py-3.5 flex flex-col md:flex-row md:items-center gap-3">
               <div className="flex-1 min-w-0">
@@ -104,7 +104,7 @@ export function EquivalenciasAdmin({ dados, produtos, onAlterados }: Props) {
               </div>
               <button
                 onClick={() => setVinculando(g)}
-                className="flex items-center justify-center gap-2 text-sm font-semibold text-brand-ink bg-brand-soft px-4 py-2.5 rounded-xl shrink-0"
+                className="flex items-center justify-center gap-2 text-sm font-semibold text-brand-ink bg-brand-soft px-4 py-2.5 rounded-md shrink-0"
               >
                 <Link2 size={16} /> {g.porEquivalente.some((e) => e.id) ? "Trocar vínculo" : "Vincular"}
               </button>

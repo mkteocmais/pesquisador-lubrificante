@@ -109,7 +109,7 @@ export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlte
 
   return (
     <div className="space-y-4">
-      <div className="bg-surface border border-line rounded-2xl p-4 space-y-3">
+      <div className="bg-surface border border-line rounded-lg p-4 space-y-3">
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
           <input
@@ -183,7 +183,7 @@ export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlte
           <button
             onClick={exportar}
             disabled={filtrados.length === 0}
-            className="flex items-center gap-2 bg-brand text-white px-5 py-3 rounded-xl text-sm font-semibold disabled:opacity-50"
+            className="flex items-center gap-2 bg-brand text-white px-5 py-3 rounded-md text-sm font-semibold disabled:opacity-50"
           >
             <Download size={18} /> Baixar Excel ({filtrados.length.toLocaleString("pt-BR")})
           </button>
@@ -192,7 +192,7 @@ export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlte
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {kpis.map(([k, v]) => (
-          <div key={k} className="bg-surface border border-line rounded-2xl p-4">
+          <div key={k} className="bg-surface border border-line rounded-lg p-4">
             <p className="text-xs text-muted">{k}</p>
             <p className="text-2xl font-semibold text-ink tabular-nums">{v}</p>
           </div>
@@ -204,12 +204,12 @@ export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlte
       ) : (
         <>
           {/* Celular: lista. Computador: tabela. */}
-          <ul className="lg:hidden bg-surface border border-line rounded-2xl divide-y divide-line overflow-hidden">
+          <ul className="lg:hidden bg-surface border border-line rounded-lg divide-y divide-line overflow-hidden">
             {filtrados.slice(0, MAX_TELA).map((l) => (
               <LancamentoItem key={l.id} l={l} equivalente={nomeEq(l.produto_ref_id)} autor={autorDe(l, perfisPorId)} onClick={() => setAberto(l)} />
             ))}
           </ul>
-          <div className="hidden lg:block bg-surface border border-line rounded-2xl overflow-x-auto">
+          <div className="hidden lg:block bg-surface border border-line rounded-lg overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-sunken text-muted text-xs text-left">
                 <tr>

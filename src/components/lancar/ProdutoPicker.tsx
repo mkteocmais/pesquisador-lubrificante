@@ -131,7 +131,7 @@ export function ListaProdutos({ titulo, produtos, valor, viscosidade, onFechar, 
           />
         </div>
         {visc && !busca && <p className="text-xs text-muted ml-1">Os de viscosidade {viscosidade} aparecem primeiro.</p>}
-        <ul className="divide-y divide-line border border-line rounded-xl overflow-hidden">
+        <ul className="divide-y divide-line border border-line rounded-md overflow-hidden">
           <li>
             <button type="button" onClick={() => onEscolher(null)} className="w-full text-left px-4 py-3 text-sm text-muted hover:bg-sunken">
               Não sei / sem equivalente

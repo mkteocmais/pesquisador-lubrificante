@@ -39,14 +39,14 @@ export function DevolutivaCard({ lancamento, equivalente }: Props) {
 
   if (carregando) {
     return (
-      <div className="bg-surface border border-line rounded-2xl p-5 flex items-center gap-3 text-sm text-muted">
+      <div className="bg-surface border border-line rounded-lg p-5 flex items-center gap-3 text-sm text-muted">
         <Loader2 size={18} className="animate-spin" /> Comparando com o mercado...
       </div>
     );
   }
   if (falhou || !dados) {
     return (
-      <div className="bg-surface border border-line rounded-2xl p-5 text-sm text-muted">
+      <div className="bg-surface border border-line rounded-lg p-5 text-sm text-muted">
         Não deu para comparar agora. Abra o lançamento de novo em "Meus preços" mais tarde.
       </div>
     );
@@ -69,7 +69,7 @@ export function DevolutivaCard({ lancamento, equivalente }: Props) {
   const principal = comDados[0];
 
   return (
-    <div className="bg-surface border border-line rounded-2xl p-5 space-y-4">
+    <div className="bg-surface border border-line rounded-lg p-5 space-y-4">
       <div>
         <p className="text-[13px] text-muted">Como está esse preço</p>
         <p className="text-xs text-muted">
@@ -82,7 +82,7 @@ export function DevolutivaCard({ lancamento, equivalente }: Props) {
           <Destaque preco={lancamento.preco} comp={principal} />
           <Faixa preco={lancamento.preco} stat={principal.stat} />
           {comDados.length > 1 && (
-            <ul className="divide-y divide-line border border-line rounded-xl">
+            <ul className="divide-y divide-line border border-line rounded-md">
               {comDados.slice(1).map((r) => (
                 <LinhaRecorte key={r.titulo} preco={lancamento.preco} comp={r} />
               ))}
@@ -108,7 +108,7 @@ function Destaque({ preco, comp }: { preco: number; comp: Comparacao }) {
   const Icone = naMedia ? Minus : v > 0 ? TrendingUp : TrendingDown;
   return (
     <div className="flex items-start gap-3">
-      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${cor}`}>
+      <div className={`w-11 h-11 rounded-md flex items-center justify-center shrink-0 ${cor}`}>
         <Icone size={22} />
       </div>
       <div>

@@ -9,6 +9,7 @@ import { AuthScreen } from "./components/auth/AuthScreen";
 import { PrimeiroAcesso } from "./components/auth/PrimeiroAcesso";
 import { BottomTab } from "./components/common/BottomTab";
 import { useToast } from "./components/common/ToastProvider";
+import { Logo } from "./components/common/Marca";
 import { LancarPage } from "./components/lancar/LancarPage";
 import { MeusPrecosPage } from "./components/meus/MeusPrecosPage";
 import { PainelPage } from "./components/painel/PainelPage";
@@ -117,28 +118,33 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-page">
-      <header className="bg-brand text-white border-b-4 border-accent sticky top-0 z-40 pt-[env(safe-area-inset-top)]">
-        <div className={`mx-auto px-4 h-14 flex items-center gap-4 ${aba === "painel" ? "max-w-7xl" : "max-w-3xl"}`}>
-          <span className="text-[13px] font-semibold tracking-wide whitespace-nowrap">
-            PESQUISADOR <span className="hidden sm:inline">DE </span>
-            <span className="text-accent">LUBRIFICANTE</span>
+      {/* Como no site da Evora: faixa azul fina em cima e cabeçalho branco com o logo. */}
+      <header className="bg-surface border-t-[5px] border-brand border-b border-b-line sticky top-0 z-40 pt-[env(safe-area-inset-top)]">
+        <div className={`mx-auto px-4 h-16 flex items-center gap-4 ${aba === "painel" ? "max-w-7xl" : "max-w-3xl"}`}>
+          <Logo className="h-9 w-auto shrink-0" />
+          <span className="hidden sm:block border-l border-line pl-4 font-condensado text-[11px] font-bold uppercase tracking-[0.2em] text-muted leading-tight">
+            Pesquisador de
+            <br />
+            lubrificante
           </span>
           {/* Computador: abas no topo. Celular: barra inferior. */}
-          <nav className="hidden md:flex gap-1 ml-4">
+          <nav className="hidden md:flex gap-1 ml-4 self-stretch">
             {abas.map((a) => (
               <button
                 key={a.id}
                 onClick={() => trocarAba(a.id)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium ${aba === a.id ? "bg-white/15" : "text-white/70 hover:text-white"}`}
+                className={`px-3 text-[15px] border-b-[3px] ${
+                  aba === a.id ? "border-accent text-ink font-medium" : "border-transparent text-muted hover:text-ink"
+                }`}
               >
                 {a.rotulo}
               </button>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-3 min-w-0">
-            <span className="text-sm text-white/80 truncate hidden sm:block">{perfil.nome}</span>
-            <button onClick={sair} aria-label="Sair" title="Sair" className="p-2 -mr-2 rounded-lg hover:bg-white/10">
-              <LogOut size={18} />
+          <div className="ml-auto flex items-center gap-2 min-w-0">
+            <span className="text-sm text-muted truncate hidden sm:block">{perfil.nome}</span>
+            <button onClick={sair} aria-label="Sair" title="Sair" className="p-2 -mr-2 rounded-md text-brand-ink hover:bg-brand-soft">
+              <LogOut size={20} />
             </button>
           </div>
         </div>

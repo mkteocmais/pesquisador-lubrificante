@@ -83,7 +83,7 @@ export function LancamentoDetalhe({ lancamento: l, perfil, produtos, concorrente
           </p>
         </div>
         <DevolutivaCard lancamento={l} equivalente={equivalente} />
-        <dl className="divide-y divide-line border border-line rounded-xl">
+        <dl className="divide-y divide-line border border-line rounded-md">
           {linhas.map(([k, v]) => (
             <div key={k} className="px-4 py-2.5 flex justify-between gap-4 text-sm">
               <dt className="text-muted shrink-0">{k}</dt>
@@ -101,28 +101,28 @@ export function LancamentoDetalhe({ lancamento: l, perfil, produtos, concorrente
           </p>
         )}
         {l.foto_url && (
-          <a href={l.foto_url} target="_blank" rel="noreferrer" className="block rounded-2xl overflow-hidden border border-line bg-sunken">
+          <a href={l.foto_url} target="_blank" rel="noreferrer" className="block rounded-lg overflow-hidden border border-line bg-sunken">
             <img src={l.foto_url} alt="Foto do produto pesquisado" className="w-full max-h-72 object-contain" loading="lazy" />
           </a>
         )}
         {confirmando ? (
-          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-3">
+          <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 space-y-3">
             <p className="text-sm text-rose-700 font-medium">Apagar este lançamento? Não dá para desfazer.</p>
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => setConfirmando(false)} className="py-3 rounded-xl bg-white border border-line text-sm font-semibold">
+              <button onClick={() => setConfirmando(false)} className="py-3 rounded-md bg-white border border-line text-sm font-semibold">
                 Cancelar
               </button>
-              <button onClick={excluir} disabled={excluindo} className="py-3 rounded-xl bg-rose-600 text-white text-sm font-semibold">
+              <button onClick={excluir} disabled={excluindo} className="py-3 rounded-md bg-rose-600 text-white text-sm font-semibold">
                 {excluindo ? <Loader2 size={18} className="animate-spin mx-auto" /> : "Apagar"}
               </button>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => setEditando(true)} className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-brand-soft text-brand-ink text-sm font-semibold">
+            <button onClick={() => setEditando(true)} className="flex items-center justify-center gap-2 py-3.5 rounded-lg bg-brand-soft text-brand-ink text-sm font-semibold">
               <Pencil size={16} /> Corrigir
             </button>
-            <button onClick={() => setConfirmando(true)} className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-rose-50 text-rose-700 text-sm font-semibold">
+            <button onClick={() => setConfirmando(true)} className="flex items-center justify-center gap-2 py-3.5 rounded-lg bg-rose-50 text-rose-700 text-sm font-semibold">
               <Trash2 size={16} /> Apagar
             </button>
           </div>

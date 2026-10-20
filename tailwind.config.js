@@ -3,17 +3,25 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}", "./public/index.html"],
   theme: {
     extend: {
-      // Mesmos tokens do Juntto, com as cores do Pesquisador: azul-marinho
-      // (#002B5C) como marca e o vermelho (#E30613) só como destaque.
+      // Identidade da Evora Lubrificantes (evoralub.com.br): azul Evora como
+      // marca, vermelho Evora como destaque (botões de chamada, marcadores) e
+      // o grafite #131E25 nos textos. Mesmos nomes de token do Juntto.
       colors: {
-        page: "#F3F4F8",
-        surface: "#FDFDFE",
-        sunken: "#F3F4F8",
-        line: "#E4E6EE",
-        ink: "#101828",
-        muted: "#667085",
-        brand: { DEFAULT: "#002B5C", ink: "#002B5C", soft: "#E8EEF6", light: "#8FB3E0" },
-        accent: { DEFAULT: "#E30613", soft: "#FDECEE" },
+        page: "#F4F5F7",
+        surface: "#FFFFFF",
+        sunken: "#F1F3F5",
+        line: "#DEE2E6",
+        ink: "#131E25",
+        muted: "#6D7A82",
+        brand: { DEFAULT: "#003CA6", ink: "#003CA6", dark: "#002971", soft: "#E6EDF8", light: "#9DB5E8" },
+        accent: { DEFAULT: "#BA1928", soft: "#FBEAEC" },
+      },
+      fontFamily: {
+        // Roboto no texto, Open Sans extra-negrito nos títulos e Roboto
+        // Condensed nos sobretítulos espaçados, como no site.
+        sans: ["Roboto", "system-ui", "-apple-system", "Segoe UI", "Arial", "sans-serif"],
+        titulo: ['"Open Sans"', "Roboto", "sans-serif"],
+        condensado: ['"Roboto Condensed"', "Roboto", "sans-serif"],
       },
     },
   },

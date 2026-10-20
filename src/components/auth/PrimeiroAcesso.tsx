@@ -33,7 +33,7 @@ export function PrimeiroAcesso({ email, onPronto, onSair }: Props) {
 
   return (
     <div className="min-h-screen bg-page flex items-center justify-center p-6">
-      <form onSubmit={salvar} className="bg-surface border border-line rounded-2xl p-6 md:p-8 w-full max-w-md space-y-5">
+      <form onSubmit={salvar} className="bg-surface border border-line rounded-lg p-6 md:p-8 w-full max-w-md space-y-5">
         <div>
           <h1 className={textStyles.h1}>Boas-vindas!</h1>
           <p className="text-sm text-muted mt-1">Como você quer aparecer nos lançamentos?</p>
