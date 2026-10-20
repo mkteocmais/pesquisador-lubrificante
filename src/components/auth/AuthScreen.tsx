@@ -70,7 +70,7 @@ export function AuthScreen() {
           <div className="py-8 md:py-0 max-w-md space-y-3">
             <Sobretitulo className="text-white/70">Pesquisa de preços</Sobretitulo>
             <h1 className="font-titulo text-[28px] md:text-[40px] font-extrabold uppercase leading-[1.15]">
-              O preço do mercado na palma da mão!
+              Performance a serviço de todos!
             </h1>
             <Divisor />
             <p className="pt-2 text-sm md:text-base text-white/80 max-w-sm">
