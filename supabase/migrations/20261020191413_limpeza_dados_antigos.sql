@@ -4,9 +4,10 @@
 -- O valor original de cada campo alterado fica em dados_originais.
 -- Só mexe no que é inequívoco; o resto recebe apenas trim.
 
-create temporary table _mapa (campo text, de text, para text) on commit drop;
+-- Sem o gatilho de updated_at: a limpeza não é uma "edição" do vendedor.
+alter table public.lubricants disable trigger lubricants_before_update;
 
-insert into _mapa (campo, de, para) values
+with _mapa (campo, de, para) as (values
   -- Marcas
   ('marca', 'mobil', 'Mobil'),
   ('marca', 'lucheti lubrificantes', 'Lucheti'),
@@ -73,12 +74,9 @@ insert into _mapa (campo, de, para) values
   ('sku', 'caixa 24x1 lt', 'Caixa Frascos 24x1L'),
   ('sku', 'balde 20kg', 'Balde 20Kg'),
   ('sku', 'balde 18 kg', 'Balde 18Kg'),
-  ('sku', 'balde/18kg', 'Balde 18Kg');
-
--- Sem o gatilho de updated_at: a limpeza não é uma "edição" do vendedor.
-alter table public.lubricants disable trigger lubricants_before_update;
-
-with novo as (
+  ('sku', 'balde/18kg', 'Balde 18Kg')
+),
+novo as (
   select l.id,
     coalesce((select para from _mapa where campo = 'marca' and de = public.chave_texto(l.marca)), nullif(trim(l.marca), '')) as marca,
     coalesce((select para from _mapa where campo = 'estado' and de = public.chave_texto(l.estado)), nullif(trim(l.estado), '')) as estado,

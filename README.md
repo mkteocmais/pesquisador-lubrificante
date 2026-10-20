@@ -20,7 +20,7 @@ O app já aponta para o projeto Supabase de produção. Para usar outro, copie `
 2. Informe o e-mail e uma senha e marque **Auto Confirm User**.
 3. No primeiro login o vendedor informa o nome. O administrador pode ajustar nome, UF, papel e bloquear o acesso em **Painel → Vendedores**.
 
-Os administradores são definidos na migração `supabase/migrations/20261020190000_perfis_vendedores.sql`.
+Os administradores são definidos na migração `supabase/migrations/20261020190923_perfis_vendedores.sql`.
 
 ## Publicação
 

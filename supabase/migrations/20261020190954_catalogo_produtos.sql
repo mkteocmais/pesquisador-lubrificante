@@ -32,18 +32,34 @@ alter table public.produtos enable row level security;
 alter table public.produto_skus enable row level security;
 
 -- Todo usuário logado consulta o catálogo; só o administrador altera.
-drop policy if exists "Produtos: leitura" on public.produtos;
-create policy "Produtos: leitura" on public.produtos
-  for select to authenticated using (true);
-drop policy if exists "Produtos: admin altera" on public.produtos;
-create policy "Produtos: admin altera" on public.produtos
-  for all to authenticated
-  using ((select public.is_admin())) with check ((select public.is_admin()));
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'produtos' and policyname = 'Produtos: leitura') then
+    create policy "Produtos: leitura" on public.produtos
+      for select to authenticated using (true);
+  end if;
+end $$;
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'produtos' and policyname = 'Produtos: admin altera') then
+    create policy "Produtos: admin altera" on public.produtos
+      for all to authenticated
+      using ((select public.is_admin())) with check ((select public.is_admin()));
+  end if;
+end $$;
 
-drop policy if exists "SKUs: leitura" on public.produto_skus;
-create policy "SKUs: leitura" on public.produto_skus
-  for select to authenticated using (true);
-drop policy if exists "SKUs: admin altera" on public.produto_skus;
-create policy "SKUs: admin altera" on public.produto_skus
-  for all to authenticated
-  using ((select public.is_admin())) with check ((select public.is_admin()));
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'produto_skus' and policyname = 'SKUs: leitura') then
+    create policy "SKUs: leitura" on public.produto_skus
+      for select to authenticated using (true);
+  end if;
+end $$;
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'produto_skus' and policyname = 'SKUs: admin altera') then
+    create policy "SKUs: admin altera" on public.produto_skus
+      for all to authenticated
+      using ((select public.is_admin())) with check ((select public.is_admin()));
+  end if;
+end $$;
