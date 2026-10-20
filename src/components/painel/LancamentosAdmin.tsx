@@ -79,7 +79,7 @@ export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlte
       if (f.equivalente === SEM && l.produto_ref_id) return false;
       if (f.equivalente && f.equivalente !== SEM && l.produto_ref_id !== f.equivalente) return false;
       if (termos.length) {
-        const alvo = chaveTexto([l.marca, l.produto, l.empresa, l.cidade, l.viscosidade, l.colaborador].join(" "));
+        const alvo = chaveTexto([l.marca, l.produto, l.empresa, l.cidade, l.viscosidade, l.desempenho, l.colaborador].join(" "));
         if (!termos.every((t) => alvo.includes(t))) return false;
       }
       return true;

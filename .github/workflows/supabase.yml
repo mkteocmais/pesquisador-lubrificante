@@ -23,17 +23,26 @@ jobs:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
       PROJECT_REF: udbaskofvhcaudyeolrd
     steps:
+      # Sem os secrets, avisa e pula (não deixa a main vermelha). As
+      # migrações podem ter sido aplicadas pelo MCP do Supabase.
       - name: Conferir secrets
+        id: secrets
         run: |
           if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_DB_PASSWORD" ]; then
-            echo "::error::Cadastre SUPABASE_ACCESS_TOKEN e SUPABASE_DB_PASSWORD em Settings > Secrets and variables > Actions."
-            exit 1
+            echo "::warning::Migrações não aplicadas: cadastre SUPABASE_ACCESS_TOKEN e SUPABASE_DB_PASSWORD em Settings > Secrets and variables > Actions."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
           fi
       - uses: actions/checkout@v6
+        if: steps.secrets.outputs.ok == 'true'
       - uses: supabase/setup-cli@v1
+        if: steps.secrets.outputs.ok == 'true'
         with:
           version: latest
       - name: Ligar projeto
+        if: steps.secrets.outputs.ok == 'true'
         run: supabase link --project-ref "$PROJECT_REF"
       - name: Aplicar migrações
+        if: steps.secrets.outputs.ok == 'true'
         run: supabase db push

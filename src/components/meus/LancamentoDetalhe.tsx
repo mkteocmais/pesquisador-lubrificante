@@ -68,6 +68,7 @@ export function LancamentoDetalhe({ lancamento: l, perfil, produtos, concorrente
     ["Marca", l.marca],
     ["Produto", l.produto],
     ["Viscosidade", l.viscosidade],
+    ["Desempenho", l.desempenho],
     ["Embalagem", l.sku || l.unidade],
     ["Fluxo de venda", l.cliente?.replace("->", "→")],
     ["Equivalente Grupo Pax", equivalente?.nome ?? "Não informado"],

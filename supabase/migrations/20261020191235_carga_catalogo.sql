@@ -1,6 +1,6 @@
 -- Carga do catálogo gerada a partir da planilha Mapemento_Produtos_Pesquisa.xlsx
 -- (aba bProdutosGrupoPax). Reexecutar é seguro: atualiza pelo nome/código.
--- Os SKUs (código SAP) ficam em 20261020192000_carga_skus.sql.
+-- Os SKUs (código SAP) ficam em 20261020220000_carga_skus.sql.
 
 insert into public.produtos (nome, tipo, viscosidade, especificacao, base, aplicacao, ativo) values
 ('EVOLI CPXC ECO - NLGI 2','Graxa','NLGI 2','Biodegradável','Sintética','Graxa',true),

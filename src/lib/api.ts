@@ -1,6 +1,6 @@
 import { supabase, BUCKET_FOTOS } from "./supabaseClient";
 import { reduzirFoto } from "../utils/foto";
-import type { Concorrente, Devolutiva, Lancamento, NovoLancamento, Perfil, Produto } from "../types";
+import type { Concorrente, Devolutiva, Equivalencia, Lancamento, NovoLancamento, Perfil, Produto, RankingLinha } from "../types";
 
 // Único lugar do app que fala com o banco. As telas recebem dados já tipados e
 // erros como Error (a mensagem amigável fica com quem mostra o toast).
@@ -32,6 +32,18 @@ export async function sugerirEquivalente(marca: string, produto: string): Promis
   const { data, error } = await supabase.rpc("sugerir_equivalente", { p_marca: marca, p_produto: produto });
   if (error) throw error;
   return ((data ?? []) as { produto_id: string; usos: number }[]).map((s) => ({ ...s, usos: Number(s.usos) }));
+}
+
+export async function rankingEnvios(desde: Date | null): Promise<RankingLinha[]> {
+  const { data, error } = await supabase.rpc("ranking_envios", { p_desde: desde ? desde.toISOString() : null });
+  if (error) throw error;
+  return ((data ?? []) as RankingLinha[]).map((r) => ({ ...r, envios: Number(r.envios), eu: !!r.eu }));
+}
+
+export async function baseEquivalencias(): Promise<Equivalencia[]> {
+  const { data, error } = await supabase.rpc("base_equivalencias");
+  if (error) throw error;
+  return ((data ?? []) as Equivalencia[]).map((e) => ({ ...e, usos: Number(e.usos) }));
 }
 
 export async function devolutiva(id: string): Promise<Devolutiva | null> {

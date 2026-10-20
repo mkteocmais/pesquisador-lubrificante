@@ -6,6 +6,7 @@ import { theme, textStyles } from "../../utils/theme";
 import { EmptyState } from "../common/EmptyState";
 import { TituloPagina } from "../common/Marca";
 import { LancamentoDetalhe } from "./LancamentoDetalhe";
+import { RankingEnvios } from "./RankingEnvios";
 
 interface Props {
   perfil: Perfil;
@@ -100,6 +101,8 @@ export function MeusPrecosPage({ perfil, produtos, concorrentes, lancamentos, on
           </div>
         ))}
       </div>
+
+      <RankingEnvios atualizar={lancamentos.length} />
 
       {lancamentos.length === 0 ? (
         <EmptyState

@@ -1,18 +1,18 @@
 -- APLICAR SÓ DEPOIS QUE O APP NOVO (com login) ESTIVER PUBLICADO NA MAIN.
 --
 -- O app antigo gravava e lia sem login, com a chave pública que fica no
--- código da página. Enquanto essas policies existirem, qualquer pessoa com a
--- chave consegue baixar todos os preços. Quando todos os vendedores estiverem
--- usando o app novo, mova este arquivo para supabase/migrations/ com um
--- timestamp novo e aplique.
+-- código da página. Enquanto essas policies valerem, qualquer pessoa com a
+-- chave consegue baixar todos os preços.
+--
+-- Em vez de remover as policies (o conector do Supabase pede confirmação
+-- manual para DROP), elas passam a negar tudo. Mesmo efeito, e reversível.
 
-drop policy if exists "Permitir inserção anônima" on public.lubricants;
-drop policy if exists "Permitir leitura anônima" on public.lubricants;
-drop policy if exists "Permitir upload anonimo" on storage.objects;
-
--- As fotos continuam públicas pelo link (o bucket é público), mas listar o
--- bucket passa a exigir login.
-drop policy if exists "Permitir visualizacao anonima" on storage.objects;
+alter policy "Permitir inserção anônima" on public.lubricants with check (false);
+alter policy "Permitir leitura anônima" on public.lubricants using (false);
+alter policy "Permitir upload anonimo" on storage.objects with check (false);
+-- As fotos continuam abrindo pelo link (o bucket é público); só listar o
+-- bucket sem login deixa de funcionar.
+alter policy "Permitir visualizacao anonima" on storage.objects using (false);
 
 -- Limite de tamanho e tipo das fotos (o app novo já reduz a foto antes de enviar).
 update storage.buckets

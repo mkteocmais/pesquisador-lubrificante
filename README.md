@@ -2,7 +2,7 @@
 
 Pesquisa de preço de mercado para a equipe comercial do Grupo Pax.
 
-- **Vendedor (celular):** entra com e-mail e senha, lança o preço do concorrente (com foto opcional), liga ao nosso produto equivalente e vê na hora se o preço está acima, abaixo ou na média do que a equipe já pesquisou. Em "Meus preços" consulta, corrige e apaga o que lançou.
+- **Vendedor (celular):** entra com e-mail e senha, lança o preço do concorrente (com foto opcional), informa o desempenho (API, ACEA, DEXOS...), liga ao nosso produto equivalente e vê na hora se o preço está acima, abaixo ou na média do que a equipe já pesquisou. Em "Meus preços" consulta, corrige e apaga o que lançou e vê o ranking de envios da equipe. Na aba "Equivalências" consulta a base concorrente → produto nosso. O vendedor não baixa preços.
 - **Administrador (computador):** vê todos os lançamentos com filtros, baixa a planilha Excel (Lançamentos, Equivalências e Resumo de preços), monta a base de equivalências e gerencia os vendedores.
 
 ## Rodando localmente

@@ -124,3 +124,41 @@ export const MARCAS_BASE = [
   "TotalEnergies",
   "Valvoline",
 ];
+
+// Especificações de desempenho mais comuns, para marcar com um toque no
+// formulário. O vendedor também pode digitar qualquer outra.
+export const DESEMPENHOS = [
+  // Os 10 primeiros aparecem direto; o resto em "mais...".
+  "API SP",
+  "API SN",
+  "API CK-4",
+  "API CI-4",
+  "API GL-5",
+  "ACEA C3",
+  "ACEA E7",
+  "DEXOS 1 Gen 3",
+  "ILSAC GF-6",
+  "JASO MA2",
+  "API SQ",
+  "API SN Plus",
+  "API SL",
+  "API CJ-4",
+  "API CH-4",
+  "API CF",
+  "API GL-4",
+  "ACEA A3/B4",
+  "ACEA C2",
+  "ACEA E9",
+  "DEXOS 2",
+  "MB 228.3",
+  "Volvo VDS-4.5",
+  "Allison C-4",
+];
+
+// "API SP, ACEA C3" <-> ["API SP", "ACEA C3"]
+export function separarDesempenho(texto: string | null | undefined): string[] {
+  return (texto || "")
+    .split(/[,;]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}

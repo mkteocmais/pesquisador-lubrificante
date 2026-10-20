@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ClipboardList, LayoutDashboard, Loader2, LogOut, PlusCircle } from "lucide-react";
+import { ClipboardList, LayoutDashboard, Link2, Loader2, LogOut, PlusCircle } from "lucide-react";
 import { useAuth } from "./hooks/useAuth";
 import { supabase } from "./lib/supabaseClient";
 import { carregarConcorrentes, carregarPerfil, carregarProdutos, meusLancamentos } from "./lib/api";
@@ -13,6 +13,7 @@ import { Logo } from "./components/common/Marca";
 import { LancarPage } from "./components/lancar/LancarPage";
 import { MeusPrecosPage } from "./components/meus/MeusPrecosPage";
 import { PainelPage } from "./components/painel/PainelPage";
+import { EquivalenciasPage } from "./components/equivalencias/EquivalenciasPage";
 
 function TelaCheia({ children }: { children: React.ReactNode }) {
   return <div className="min-h-screen bg-page flex items-center justify-center p-6 text-center">{children}</div>;
@@ -107,6 +108,7 @@ export default function App() {
   const abas: { id: Aba; rotulo: string; icone: React.ReactNode }[] = [
     { id: "lancar", rotulo: "Lançar", icone: <PlusCircle size={22} /> },
     { id: "meus", rotulo: "Meus preços", icone: <ClipboardList size={22} /> },
+    { id: "equivalencias", rotulo: "Equivalências", icone: <Link2 size={22} /> },
     ...(admin ? [{ id: "painel" as Aba, rotulo: "Painel", icone: <LayoutDashboard size={22} /> }] : []),
   ];
 
@@ -165,10 +167,11 @@ export default function App() {
             onLancar={() => trocarAba("lancar")}
           />
         )}
+        {aba === "equivalencias" && <EquivalenciasPage produtos={produtos} atualizar={meus?.length} />}
         {aba === "painel" && admin && <PainelPage perfil={perfil} produtos={produtos} concorrentes={concorrentes} />}
       </main>
 
-      <nav className={`md:hidden fixed bottom-0 inset-x-0 bg-surface border-t border-line pb-safe z-40 grid ${admin ? "grid-cols-3" : "grid-cols-2"}`}>
+      <nav className={`md:hidden fixed bottom-0 inset-x-0 bg-surface border-t border-line pb-safe z-40 grid ${admin ? "grid-cols-4" : "grid-cols-3"}`}>
         {abas.map((a) => (
           <BottomTab key={a.id} active={aba === a.id} onClick={() => trocarAba(a.id)} icon={a.icone} label={a.rotulo} />
         ))}

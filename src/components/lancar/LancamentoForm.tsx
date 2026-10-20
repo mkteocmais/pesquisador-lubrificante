@@ -3,7 +3,7 @@ import { Camera, Image as ImageIcon, Loader2, MapPin, X } from "lucide-react";
 import type { Concorrente, Lancamento, NovoLancamento, Perfil, Produto } from "../../types";
 import { salvarLancamento, sugerirEquivalente } from "../../lib/api";
 import { buscarLocal } from "../../utils/localizacao";
-import { EMBALAGENS, FLUXOS, MARCAS_BASE, TODAS_VISCOSIDADES, UFS, VISCOSIDADES } from "../../utils/options";
+import { DESEMPENHOS, EMBALAGENS, FLUXOS, MARCAS_BASE, TODAS_VISCOSIDADES, UFS, VISCOSIDADES, separarDesempenho } from "../../utils/options";
 import { chaveTexto, parsePreco, precoParaTexto } from "../../utils/format";
 import { mensagemErro } from "../../utils/erros";
 import { theme, textStyles } from "../../utils/theme";
@@ -54,6 +54,8 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
   const [produto, setProduto] = useState(inicial?.produto ?? "");
   const [visc, setVisc] = useState(() => separarOutro(inicial?.viscosidade, TODAS_VISCOSIDADES)[0]);
   const [viscOutro, setViscOutro] = useState(() => separarOutro(inicial?.viscosidade, TODAS_VISCOSIDADES)[1]);
+  const [desempenho, setDesempenho] = useState(inicial?.desempenho ?? "");
+  const [verTodosDesempenhos, setVerTodosDesempenhos] = useState(false);
   const [produtoRef, setProdutoRef] = useState<string | null>(inicial?.produto_ref_id ?? null);
   const [sugestoes, setSugestoes] = useState<{ produto_id: string; usos: number }[]>([]);
 
@@ -160,6 +162,7 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
       marca: marca.trim(),
       produto: produto.trim(),
       viscosidade: viscFinal || null,
+      desempenho: separarDesempenho(desempenho).join(", ") || null,
       cliente: fluxo,
       sku: embFinal,
       preco: Math.round(precoNum * 100) / 100,
@@ -286,6 +289,43 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
           {visc === OUTRO && (
             <input autoComplete="off" className={theme.input + " mt-2"} placeholder="Digite a viscosidade" aria-label="Outra viscosidade" value={viscOutro} onChange={(e) => setViscOutro(e.target.value)} maxLength={60} />
           )}
+        </Campo>
+        <Campo label="Desempenho" htmlFor="f-desemp" dica="Especificações do rótulo. Toque para marcar ou digite separando por vírgula.">
+          <input
+            id="f-desemp"
+            autoComplete="off"
+            className={theme.input}
+            placeholder="Ex: API SP, ACEA C3, DEXOS 1 Gen 3"
+            value={desempenho}
+            onChange={(e) => setDesempenho(e.target.value)}
+            maxLength={200}
+          />
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {(verTodosDesempenhos ? DESEMPENHOS : DESEMPENHOS.slice(0, 10)).map((d) => {
+              const lista = separarDesempenho(desempenho);
+              const marcado = lista.some((x) => x.toLowerCase() === d.toLowerCase());
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  aria-pressed={marcado}
+                  onClick={() =>
+                    setDesempenho(
+                      (marcado ? lista.filter((x) => x.toLowerCase() !== d.toLowerCase()) : [...lista, d]).join(", ")
+                    )
+                  }
+                  className={`text-xs px-2.5 py-1.5 rounded-md border ${
+                    marcado ? "bg-brand text-white border-brand" : "bg-surface text-ink border-line"
+                  }`}
+                >
+                  {d}
+                </button>
+              );
+            })}
+            <button type="button" onClick={() => setVerTodosDesempenhos((v) => !v)} className="text-xs px-2 py-1.5 text-brand-ink font-medium">
+              {verTodosDesempenhos ? "menos" : "mais..."}
+            </button>
+          </div>
         </Campo>
       </section>
 

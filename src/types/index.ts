@@ -37,6 +37,8 @@ export interface Lancamento {
   marca: string | null;
   produto: string | null;
   viscosidade: string | null;
+  // Especificações de desempenho ("API SP, ACEA C3").
+  desempenho: string | null;
   // Fluxo de venda ("Distribuidor -> Revenda" etc.).
   cliente: string | null;
   // Embalagem pesquisada.
@@ -51,7 +53,7 @@ export interface Lancamento {
 
 export type NovoLancamento = Pick<
   Lancamento,
-  "empresa" | "estado" | "cidade" | "marca" | "produto" | "viscosidade" | "cliente" | "sku" | "preco" | "produto_ref_id"
+  "empresa" | "estado" | "cidade" | "marca" | "produto" | "viscosidade" | "desempenho" | "cliente" | "sku" | "preco" | "produto_ref_id"
 > & { localizacao?: string | null };
 
 export interface Estatistica {
@@ -80,4 +82,21 @@ export interface Concorrente {
   usos: number;
 }
 
-export type Aba = "lancar" | "meus" | "painel";
+// Linha do ranking de envios (sem preço).
+export interface RankingLinha {
+  vendedor: string;
+  envios: number;
+  eu: boolean;
+}
+
+// Item da base de equivalências visível para todos (sem preço nem autor).
+export interface Equivalencia {
+  marca: string;
+  produto: string | null;
+  viscosidade: string | null;
+  produto_id: string;
+  usos: number;
+  ultimo: string;
+}
+
+export type Aba = "lancar" | "meus" | "equivalencias" | "painel";

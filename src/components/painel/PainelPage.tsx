@@ -72,7 +72,7 @@ export function PainelPage({ perfil, produtos, concorrentes }: Props) {
 
   const abas: [Sub, string][] = [
     ["lancamentos", "Lançamentos"],
-    ["equivalencias", "Equivalências"],
+    ["equivalencias", "Gerir equivalências"],
     ["vendedores", "Vendedores"],
   ];
 
