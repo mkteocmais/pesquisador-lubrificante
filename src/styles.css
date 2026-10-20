@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-page text-ink antialiased;
+}
+
+/* Esconde a barra de rolagem de faixas horizontais sem perder o toque. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Respiro para a barra de gestos do iPhone com o app instalado na tela inicial. */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

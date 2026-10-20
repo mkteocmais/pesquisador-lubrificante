@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm ci)",
+      "Bash(npm install)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run build)",
+      "Bash(CI=true npm run build)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(supabase db reset:*)"
+    ]
+  }
+}
