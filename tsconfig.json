@@ -1,0 +1,10 @@
+{
+  "include": ["./src/**/*"],
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "lib": ["dom", "dom.iterable", "es2019"],
+    "jsx": "react-jsx",
+    "skipLibCheck": true
+  }
+}

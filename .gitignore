@@ -1,0 +1,11 @@
+node_modules
+build
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+
+# Claude Code (config pessoal) e Supabase CLI
+.claude/settings.local.json
+supabase/.temp
+supabase/.branches

@@ -1,0 +1,4 @@
+# Configuração mínima da Supabase CLI. O projeto remoto (PesquisaLubrificantes)
+# é ligado no CI com `supabase link --project-ref udbaskofvhcaudyeolrd`
+# (ver .github/workflows/supabase.yml).
+project_id = "pesquisador-lubrificante"
