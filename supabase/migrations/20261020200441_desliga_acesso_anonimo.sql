@@ -1,8 +1,8 @@
--- APLICAR SÓ DEPOIS QUE O APP NOVO (com login) ESTIVER PUBLICADO NA MAIN.
+-- Troca de versão: o app novo (com login) está publicado na main.
 --
 -- O app antigo gravava e lia sem login, com a chave pública que fica no
--- código da página. Enquanto essas policies valerem, qualquer pessoa com a
--- chave consegue baixar todos os preços.
+-- código da página. Enquanto essas policies valiam, qualquer pessoa com a
+-- chave conseguia baixar todos os preços.
 --
 -- Em vez de remover as policies (o conector do Supabase pede confirmação
 -- manual para DROP), elas passam a negar tudo. Mesmo efeito, e reversível.

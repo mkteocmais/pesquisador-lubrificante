@@ -40,7 +40,6 @@ src/
   utils/xlsx.ts               gerador de .xlsx sem biblioteca (ZIP "store" + XML)
   types/index.ts              tipos que espelham as tabelas
 supabase/migrations/          histórico do schema (fonte da verdade)
-supabase/pendentes/           SQL que só deve virar migração depois de um passo manual
 ```
 
 ## Modelo de dados
@@ -62,7 +61,7 @@ supabase/pendentes/           SQL que só deve virar migração depois de um pas
 - **RLS em tudo.** Policies `to authenticated` usando `auth.uid()`, `public.is_admin()` e `public.is_ativo()`.
 - **Mudança de schema = arquivo de migração** em `supabase/migrations/<YYYYMMDDHHMMSS>_<nome>.sql`, aplicado pelo `supabase.yml` no merge. Não aplique DDL direto em produção pelo MCP/CLI. Consultas de leitura pelo MCP estão liberadas.
 - Funções `security definer`: `set search_path = public` e `revoke ... from public, anon`.
-- As policies anônimas do app antigo são neutralizadas na troca de versão (`supabase/pendentes/desliga_acesso_anonimo.sql`, que vira migração quando aplicado).
+- O acesso anônimo do app antigo foi desligado (migração `desliga_acesso_anonimo`): sem login ninguém lê nem grava lançamentos.
 - Pelo MCP do Supabase, `DROP` fica esperando confirmação manual e a aplicação trava: escreva migrações sem `DROP` (`do $$ ... if not exists`, `create or replace trigger`, `alter policy`). Depois de aplicar pelo MCP, renomeie o arquivo para a versão registrada (`list_migrations`), senão o `supabase db push` tenta reaplicar.
 - A URL e a chave publicável do Supabase são públicas por definição; a `service_role` nunca vai para o front.
 - CSP em `vercel.json`: domínio externo novo precisa entrar em `connect-src` (hoje: Supabase e `nominatim.openstreetmap.org`, para cidade/UF pelo GPS).
