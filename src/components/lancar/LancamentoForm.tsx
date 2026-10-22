@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Camera, Image as ImageIcon, Loader2, MapPin, X } from "lucide-react";
-import type { Concorrente, Lancamento, NovoLancamento, Perfil, Produto } from "../../types";
+import type { CadEmpresa, CadProduto, Cadastros, Lancamento, NovoLancamento, Perfil, Produto } from "../../types";
 import { salvarLancamento, sugerirEquivalente } from "../../lib/api";
 import { buscarLocal } from "../../utils/localizacao";
-import { DESEMPENHOS, EMBALAGENS, FLUXOS, MARCAS_BASE, TODAS_VISCOSIDADES, UFS, VISCOSIDADES, separarDesempenho } from "../../utils/options";
+import { DESEMPENHOS, EMBALAGENS, FLUXOS, MARCAS_BASE, TODAS_VISCOSIDADES, UFS, VISCOSIDADES, separarDesempenho, volumeDaEmbalagem } from "../../utils/options";
 import { chaveTexto, parsePreco, precoParaTexto } from "../../utils/format";
 import { mensagemErro } from "../../utils/erros";
 import { theme, textStyles } from "../../utils/theme";
 import { Campo } from "../common/Campo";
-import { SuggestInput } from "../common/SuggestInput";
+import { Autocompletar, ItemAuto } from "../common/Autocompletar";
 import { useToast } from "../common/ToastProvider";
 import { ProdutoPicker } from "./ProdutoPicker";
 
@@ -23,7 +23,7 @@ export interface LocalPesquisa {
 interface Props {
   perfil: Perfil;
   produtos: Produto[];
-  concorrentes: Concorrente[];
+  cadastros: Cadastros;
   inicial?: Lancamento;
   local?: LocalPesquisa | null;
   onSalvo: (l: Lancamento, local: LocalPesquisa) => void;
@@ -39,10 +39,9 @@ function separarOutro(valor: string | null | undefined, lista: string[]): [strin
   return achado ? [achado, ""] : [OUTRO, valor];
 }
 
-export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local, onSalvo, onCancelar }: Props) {
+export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, onSalvo, onCancelar }: Props) {
   const { showError } = useToast();
   const editando = !!inicial;
-  const nomesEmbalagem = useMemo(() => EMBALAGENS.map((e) => e.nome), []);
 
   const [empresa, setEmpresa] = useState(inicial?.empresa ?? local?.empresa ?? "");
   const [cidade, setCidade] = useState(inicial?.cidade ?? local?.cidade ?? "");
@@ -60,8 +59,7 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
   const [sugestoes, setSugestoes] = useState<{ produto_id: string; usos: number }[]>([]);
 
   const [fluxo, setFluxo] = useState(inicial?.cliente ?? "");
-  const [emb, setEmb] = useState(() => separarOutro(inicial?.sku, nomesEmbalagem)[0]);
-  const [embOutro, setEmbOutro] = useState(() => separarOutro(inicial?.sku, nomesEmbalagem)[1]);
+  const [embalagem, setEmbalagem] = useState(inicial?.sku ?? "");
   const [preco, setPreco] = useState(precoParaTexto(inicial?.preco));
 
   const [foto, setFoto] = useState<File | null>(null);
@@ -114,31 +112,52 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
     return () => URL.revokeObjectURL(url);
   }, [foto]);
 
-  const opcoesMarca = useMemo(() => {
-    const vistas = concorrentes.map((c) => c.marca);
-    return Array.from(new Set([...vistas, ...MARCAS_BASE]));
-  }, [concorrentes]);
+  // Autocompletar a partir dos cadastros mantidos pelos administradores.
+  const itensEmpresa = useMemo<ItemAuto<CadEmpresa>[]>(
+    () =>
+      cadastros.empresas
+        .filter((e) => e.ativo)
+        .map((e) => ({ rotulo: e.nome, detalhe: [e.cidade, e.uf].filter(Boolean).join("/") || undefined, dados: e })),
+    [cadastros.empresas]
+  );
 
-  const opcoesProduto = useMemo(() => {
+  const itensMarca = useMemo<ItemAuto[]>(() => {
+    const ativas = cadastros.marcas.filter((m) => m.ativo).map((m) => m.nome);
+    const ja = new Set(ativas.map(chaveTexto));
+    return [...ativas, ...MARCAS_BASE.filter((m) => !ja.has(chaveTexto(m)))].map((rotulo) => ({ rotulo }));
+  }, [cadastros.marcas]);
+
+  const itensProduto = useMemo<ItemAuto<CadProduto>[]>(() => {
     const k = chaveTexto(marca);
-    return concorrentes.filter((c) => c.produto && (!k || chaveTexto(c.marca) === k)).map((c) => c.produto as string);
-  }, [concorrentes, marca]);
+    const idsMarca = new Set(cadastros.marcas.filter((m) => m.ativo && chaveTexto(m.nome) === k).map((m) => m.id));
+    return cadastros.produtos
+      .filter((p) => p.ativo && idsMarca.has(p.marca_id))
+      .map((p) => ({ rotulo: p.nome, detalhe: [p.viscosidade, p.desempenho].filter(Boolean).join(" · ") || undefined, dados: p }));
+  }, [cadastros.marcas, cadastros.produtos, marca]);
 
-  const escolherProduto = (v: string) => {
-    setProduto(v);
-    // Escolheu um produto já pesquisado: aproveita a viscosidade dele.
-    if (!visc) {
-      const c = concorrentes.find((x) => chaveTexto(x.marca) === chaveTexto(marca) && chaveTexto(x.produto) === chaveTexto(v));
-      if (c?.viscosidade) {
-        const [sel, outro] = separarOutro(c.viscosidade, TODAS_VISCOSIDADES);
-        setVisc(sel);
-        setViscOutro(outro);
-      }
+  const itensEmbalagem = useMemo<ItemAuto[]>(() => EMBALAGENS.map((e) => ({ rotulo: e.nome })), []);
+
+  const escolherEmpresa = (item: ItemAuto<CadEmpresa>) => {
+    // A empresa do cadastro já traz cidade e UF.
+    if (item.dados?.cidade) setCidade(item.dados.cidade);
+    if (item.dados?.uf) setEstado(item.dados.uf);
+  };
+
+  const escolherProduto = (item: ItemAuto<CadProduto>) => {
+    // Produto do cadastro: aproveita viscosidade e desempenho se ainda vazios.
+    const p = item.dados;
+    if (!p) return;
+    if (!visc && p.viscosidade) {
+      const [sel, outro] = separarOutro(p.viscosidade, TODAS_VISCOSIDADES);
+      setVisc(sel);
+      setViscOutro(outro);
     }
+    if (!desempenho.trim() && p.desempenho) setDesempenho(p.desempenho);
   };
 
   const viscFinal = visc === OUTRO ? viscOutro.trim() : visc;
-  const embFinal = emb === OUTRO ? embOutro.trim() : emb;
+  const embFinal = embalagem.trim();
+  const volumeEmb = volumeDaEmbalagem(embFinal);
   const precoNum = parsePreco(preco);
 
   const faltando: string[] = [];
@@ -226,7 +245,16 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
       <section className="space-y-4">
         <h2 className={textStyles.section}>Onde</h2>
         <Campo label="Empresa pesquisada" htmlFor="f-empresa">
-          <input id="f-empresa" autoComplete="off" className={theme.input + erro(!empresa.trim())} placeholder="Nome do local ou da empresa" value={empresa} onChange={(e) => setEmpresa(e.target.value)} maxLength={200} />
+          <Autocompletar
+            id="f-empresa"
+            value={empresa}
+            onChange={setEmpresa}
+            itens={itensEmpresa}
+            onEscolher={escolherEmpresa}
+            placeholder="Nome do local ou da empresa"
+            ariaLabel="Empresa pesquisada"
+            className={theme.input + erro(!empresa.trim())}
+          />
         </Campo>
         <div className="grid grid-cols-[1fr_7rem] gap-3">
           <Campo label="Cidade" htmlFor="f-cidade">
@@ -254,21 +282,22 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
       <section className="space-y-4">
         <h2 className={textStyles.section}>Produto do concorrente</h2>
         <Campo label="Marca">
-          <SuggestInput
+          <Autocompletar
             value={marca}
             onChange={setMarca}
-            options={opcoesMarca}
+            itens={itensMarca}
             placeholder="Ex: Lubrax, Mobil, Shell..."
             ariaLabel="Marca"
             className={theme.input + erro(!marca.trim())}
           />
         </Campo>
         <Campo label="Nome do produto">
-          <SuggestInput
+          <Autocompletar
             value={produto}
-            onChange={escolherProduto}
-            options={opcoesProduto}
-            showOnEmpty={!!marca.trim()}
+            onChange={setProduto}
+            itens={itensProduto}
+            onEscolher={escolherProduto}
+            mostrarVazio={itensProduto.length > 0}
             placeholder="Ex: Essencial CI-4, Rimula R4..."
             ariaLabel="Nome do produto"
             className={theme.input + erro(!produto.trim())}
@@ -350,15 +379,22 @@ export function LancamentoForm({ perfil, produtos, concorrentes, inicial, local,
           </select>
         </Campo>
         <Campo label="Embalagem" htmlFor="f-emb">
-          <select id="f-emb" className={theme.select + erro(!embFinal)} value={emb} onChange={(e) => setEmb(e.target.value)}>
-            <option value="">Selecione...</option>
-            {nomesEmbalagem.map((o) => (
-              <option key={o}>{o}</option>
-            ))}
-            <option value={OUTRO}>Outra (digitar)</option>
-          </select>
-          {emb === OUTRO && (
-            <input autoComplete="off" className={theme.input + " mt-2"} placeholder="Descreva a embalagem" aria-label="Outra embalagem" value={embOutro} onChange={(e) => setEmbOutro(e.target.value)} maxLength={80} />
+          <Autocompletar
+            id="f-emb"
+            value={embalagem}
+            onChange={setEmbalagem}
+            itens={itensEmbalagem}
+            mostrarVazio
+            placeholder="Ex: Bombona 20L, Caixa 12x1L, Tambor 200L"
+            ariaLabel="Embalagem"
+            className={theme.input + erro(!embFinal)}
+          />
+          {embFinal && (
+            <p className={`text-xs ml-1 ${volumeEmb ? "text-muted" : "text-amber-700"}`}>
+              {volumeEmb
+                ? `Volume: ${volumeEmb.volume.toLocaleString("pt-BR")} ${volumeEmb.unidade} (para o preço por ${volumeEmb.unidade === "kg" ? "quilo" : "litro"})`
+                : "Não deu para ler o volume. Inclua a quantidade, ex: 20L, 12x1L, 18kg."}
+            </p>
           )}
         </Campo>
         <div className={`rounded-lg border-2 p-4 text-center ${tentou && !(precoNum > 0) ? "border-rose-400" : "border-brand"} bg-brand-soft/40`}>

@@ -1,6 +1,6 @@
 import { supabase, BUCKET_FOTOS } from "./supabaseClient";
 import { reduzirFoto } from "../utils/foto";
-import type { Concorrente, Devolutiva, Equivalencia, Lancamento, NovoLancamento, Perfil, Produto, RankingLinha } from "../types";
+import type { Cadastros, Devolutiva, Equivalencia, Lancamento, NovoLancamento, Perfil, Produto, RankingLinha } from "../types";
 
 // Único lugar do app que fala com o banco. As telas recebem dados já tipados e
 // erros como Error (a mensagem amigável fica com quem mostra o toast).
@@ -22,10 +22,58 @@ export async function carregarProdutos(): Promise<Produto[]> {
   return (data ?? []) as Produto[];
 }
 
-export async function carregarConcorrentes(): Promise<Concorrente[]> {
-  const { data, error } = await supabase.rpc("catalogo_concorrentes");
+// Empresas, marcas e produtos de concorrentes para o autocompletar. O
+// administrador recebe também os arquivados (RLS).
+export async function carregarCadastros(): Promise<Cadastros> {
+  const [m, p, e] = await Promise.all([
+    supabase.from("cad_marcas").select("id, nome, ativo, revisado").order("nome").limit(5000),
+    supabase.from("cad_produtos").select("id, marca_id, nome, viscosidade, desempenho, ativo, revisado").order("nome").limit(10000),
+    supabase.from("cad_empresas").select("id, nome, cidade, uf, ativo, revisado").order("nome").limit(10000),
+  ]);
+  if (m.error) throw m.error;
+  if (p.error) throw p.error;
+  if (e.error) throw e.error;
+  return { marcas: m.data ?? [], produtos: p.data ?? [], empresas: e.data ?? [] } as Cadastros;
+}
+
+export async function adminSalvarMarca(id: string | null, nome: string): Promise<string> {
+  const { data, error } = await supabase.rpc("admin_salvar_marca", { p_id: id, p_nome: nome });
   if (error) throw error;
-  return ((data ?? []) as Concorrente[]).map((c) => ({ ...c, usos: Number(c.usos) }));
+  return data as string;
+}
+
+export async function adminSalvarProduto(p: {
+  id: string | null;
+  marca_id: string | null;
+  nome: string;
+  viscosidade: string | null;
+  desempenho: string | null;
+}): Promise<string> {
+  const { data, error } = await supabase.rpc("admin_salvar_produto", {
+    p_id: p.id,
+    p_marca_id: p.marca_id,
+    p_nome: p.nome,
+    p_viscosidade: p.viscosidade,
+    p_desempenho: p.desempenho,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function adminSalvarEmpresa(p: { id: string | null; nome: string; cidade: string | null; uf: string | null }): Promise<string> {
+  const { data, error } = await supabase.rpc("admin_salvar_empresa", { p_id: p.id, p_nome: p.nome, p_cidade: p.cidade, p_uf: p.uf });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function adminStatusCadastro(tipo: "marca" | "produto" | "empresa", id: string, mudanca: { ativo?: boolean; revisado?: boolean }) {
+  const { error } = await supabase.rpc("admin_status_cadastro", {
+    p_tipo: tipo,
+    p_id: id,
+    p_ativo: mudanca.ativo ?? null,
+    p_revisado: mudanca.revisado ?? null,
+  });
+  if (error) throw error;
 }
 
 export async function sugerirEquivalente(marca: string, produto: string): Promise<{ produto_id: string; usos: number }[]> {

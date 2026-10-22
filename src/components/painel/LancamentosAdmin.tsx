@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { Download, Search, X } from "lucide-react";
-import type { Concorrente, Lancamento, Perfil, Produto } from "../../types";
+import type { Cadastros, Lancamento, Perfil, Produto } from "../../types";
 import { chaveTexto, dataLocalISO, formatBRL, formatData } from "../../utils/format";
 import { autorDe, planilhaLancamentos } from "../../utils/exportar";
 import { baixarArquivo } from "../../utils/xlsx";
 import { theme } from "../../utils/theme";
 import { EmptyState } from "../common/EmptyState";
+import { ListaRolavel, usarLote } from "../common/ListaRolavel";
 import { LancamentoDetalhe } from "../meus/LancamentoDetalhe";
 import { LancamentoItem } from "../meus/MeusPrecosPage";
 import type { DadosPainel } from "./PainelPage";
@@ -14,7 +15,7 @@ interface Props {
   dados: DadosPainel;
   perfil: Perfil;
   produtos: Produto[];
-  concorrentes: Concorrente[];
+  cadastros: Cadastros;
   onAlterado: (l: Lancamento) => void;
   onExcluido: (id: string) => void;
 }
@@ -33,8 +34,6 @@ interface Filtros {
 
 const VAZIO: Filtros = { de: "", ate: "", vendedor: "", uf: "", marca: "", equivalente: "", fluxo: "", embalagem: "", busca: "" };
 const SEM = "__sem__";
-// A tela mostra no máximo isso; a planilha leva tudo o que estiver filtrado.
-const MAX_TELA = 300;
 
 function opcoes(valores: (string | null | undefined)[]): string[] {
   const vistos = new Map<string, string>();
@@ -45,7 +44,7 @@ function opcoes(valores: (string | null | undefined)[]): string[] {
   return Array.from(vistos.values()).sort((a, b) => a.localeCompare(b));
 }
 
-export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlterado, onExcluido }: Props) {
+export function LancamentosAdmin({ dados, perfil, produtos, cadastros, onAlterado, onExcluido }: Props) {
   const [f, setF] = useState<Filtros>(VAZIO);
   const [aberto, setAberto] = useState<Lancamento | null>(null);
   const { lancamentos, perfisPorId, produtosPorId } = dados;
@@ -85,6 +84,8 @@ export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlte
       return true;
     });
   }, [lancamentos, f, perfisPorId]);
+
+  const { limite, aoRolar } = usarLote(filtrados.length, f);
 
   const kpis = useMemo(() => {
     const vendedores = new Set(filtrados.map((l) => chaveTexto(autorDe(l, perfisPorId))));
@@ -204,14 +205,18 @@ export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlte
       ) : (
         <>
           {/* Celular: lista. Computador: tabela. */}
-          <ul className="lg:hidden bg-surface border border-line rounded-lg divide-y divide-line overflow-hidden">
-            {filtrados.slice(0, MAX_TELA).map((l) => (
-              <LancamentoItem key={l.id} l={l} equivalente={nomeEq(l.produto_ref_id)} autor={autorDe(l, perfisPorId)} onClick={() => setAberto(l)} />
-            ))}
-          </ul>
-          <div className="hidden lg:block bg-surface border border-line rounded-lg overflow-x-auto">
+          <div className="lg:hidden">
+            <ListaRolavel
+              itens={filtrados}
+              chave={(l) => l.id}
+              reiniciarQuando={f}
+              render={(l) => <LancamentoItem l={l} equivalente={nomeEq(l.produto_ref_id)} autor={autorDe(l, perfisPorId)} onClick={() => setAberto(l)} />}
+            />
+          </div>
+          {/* Tabela com rolagem própria: 50 linhas por vez, mais ao rolar. */}
+          <div onScroll={aoRolar} className="hidden lg:block bg-surface border border-line rounded-lg overflow-auto max-h-[70vh]">
             <table className="w-full text-sm">
-              <thead className="bg-sunken text-muted text-xs text-left">
+              <thead className="bg-sunken text-muted text-xs text-left sticky top-0 z-10">
                 <tr>
                   {["Data", "Vendedor", "Empresa", "Cidade/UF", "Marca", "Produto", "Visc.", "Embalagem", "Fluxo", "Preço", "Equivalente"].map((h) => (
                     <th key={h} className={`px-3 py-2.5 font-medium whitespace-nowrap ${h === "Preço" ? "text-right" : ""}`}>
@@ -221,7 +226,7 @@ export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlte
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {filtrados.slice(0, MAX_TELA).map((l) => (
+                {filtrados.slice(0, limite).map((l) => (
                   <tr key={l.id} onClick={() => setAberto(l)} className="hover:bg-sunken cursor-pointer">
                     <td className="px-3 py-2 whitespace-nowrap text-muted">{formatData(l.created_at)}</td>
                     <td className="px-3 py-2 whitespace-nowrap">{autorDe(l, perfisPorId)}</td>
@@ -241,9 +246,9 @@ export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlte
               </tbody>
             </table>
           </div>
-          {filtrados.length > MAX_TELA && (
-            <p className="text-xs text-muted text-center">
-              Mostrando {MAX_TELA} de {filtrados.length.toLocaleString("pt-BR")}. A planilha leva todos.
+          {filtrados.length > 50 && (
+            <p className="hidden lg:block text-[11px] text-muted text-right">
+              {Math.min(limite, filtrados.length).toLocaleString("pt-BR")} de {filtrados.length.toLocaleString("pt-BR")} · role a tabela para ver mais
             </p>
           )}
         </>
@@ -254,7 +259,7 @@ export function LancamentosAdmin({ dados, perfil, produtos, concorrentes, onAlte
           lancamento={aberto}
           perfil={perfil}
           produtos={produtos}
-          concorrentes={concorrentes}
+          cadastros={cadastros}
           autor={autorDe(aberto, perfisPorId)}
           onFechar={() => setAberto(null)}
           onAlterado={(novo) => {

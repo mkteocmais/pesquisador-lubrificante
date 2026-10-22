@@ -34,7 +34,9 @@ src/
   components/lancar/          formulário, escolha do equivalente, retorno de preço (DevolutivaCard)
   components/meus/            lista e detalhe dos lançamentos do vendedor + ranking de envios
   components/equivalencias/   base de equivalências para consulta de todos (sem preço)
-  components/painel/          administrador: lançamentos + Excel, equivalências, vendedores
+  components/painel/          administrador: lançamentos + Excel, equivalências, cadastros (com duplicados parecidos), vendedores
+  components/common/          Autocompletar (com "Você quis dizer?"), ListaRolavel (50 por vez, rolagem própria)
+  utils/similaridade.ts       similaridade de nomes (trigramas) para sugestões e duplicados
   utils/options.ts            viscosidades, fluxos de venda, embalagens (com volume), UFs
   utils/exportar.ts           monta a planilha (Lançamentos, Equivalências, Resumo de preços)
   utils/xlsx.ts               gerador de .xlsx sem biblioteca (ZIP "store" + XML)
@@ -47,14 +49,16 @@ supabase/migrations/          histórico do schema (fonte da verdade)
 - `profiles`: um por login (`id = auth.users.id`), `papel` `vendedor|admin`, `ativo`. Criado pelo gatilho `on_auth_user_created`; os e-mails de administrador ficam como hash sha256 em `email_admin()` (o repositório é público). Muda só pelas funções `atualizar_meu_nome` e `admin_atualizar_perfil`.
 - `produtos`: nossas linhas comerciais (nome comercial da planilha "Mapeamento Produtos Pesquisa"); `produto_skus`: código SAP e embalagem de cada linha.
 - `lubricants`: os lançamentos (nome herdado do app antigo). `user_id` = vendedor, `produto_ref_id` = nosso equivalente, `cliente` = fluxo de venda, `sku` = embalagem, `desempenho` = especificações do concorrente ("API SP, ACEA C3"), `dados_originais` = valores antes da limpeza de dados. Lançamentos antigos têm `user_id` nulo e só o nome em `colaborador`.
+- **Cadastros** (`cad_empresas`, `cad_marcas`, `cad_produtos`): alimentam o autocompletar do formulário. O gatilho `lubricants_registrar_cadastros` inclui nomes novos como "não revisado". Só mudam pelas funções `admin_salvar_*` / `admin_status_cadastro`: corrigir um nome corrige os lançamentos (sem mexer no `updated_at`, via `app.renomeando`); salvar com um nome que já existe **une** os dois (o antigo fica `ativo = false`, `unido_a` = destino). Nada é apagado.
 - **Base de equivalências** = agregação de `lubricants` por marca + produto do concorrente → `produto_ref_id`. Não há tabela própria: cada vínculo feito pelo vendedor conta, e o administrador pode vincular em lote no Painel.
 
 ## Regras de negócio (NÃO quebrar)
 
-1. **Retorno de preço** (`devolutiva_preco`): compara com a **mesma embalagem** e o **mesmo fluxo de venda**, nos últimos 12 meses, sem o próprio lançamento. Primeiro entre os ligados ao mesmo equivalente nosso, depois entre todos da mesma viscosidade; no estado e no Brasil. Usa **mediana** (robusta a erro de digitação). Com **menos de 3** pesquisas devolve só a contagem, para não expor o preço de um único lançamento de outro vendedor.
+1. **Retorno de preço** (`devolutiva_preco`): só compara o que é comparável. Grupo = os ligados ao **mesmo equivalente Evora** (ou, sem equivalente, o **mesmo produto do concorrente**); nunca "todos da mesma viscosidade". Sempre o **mesmo fluxo de venda** (Fábrica → Distribuidor não se mistura com Distribuidor → Revenda), **por embalagem** (mesmo SKU) e **por litro/quilo** (`volume_embalagem`), no estado e no Brasil, últimos 12 meses, sem o próprio lançamento. Usa **mediana**. Com **menos de 3** pesquisas devolve só a contagem, para não expor o preço de um único lançamento de outro vendedor.
 2. **O vendedor só vê os próprios lançamentos e nunca baixa preços** (a planilha é só do administrador). Ele vê também a base de equivalências e o ranking de envios, ambos **sem preço**. Tudo o que cruza dados de vendedores (retorno, autocompletar, sugestão de equivalente, `base_equivalencias`, `ranking_envios`) passa por função `security definer` que devolve só agregados, nunca linhas.
-3. Comparações de texto usam `chave_texto` (sem acento, minúsculas, sem espaço sobrando) e de viscosidade `chave_visc` ("SAE 15W-40" = "15w40"). No front, as mesmas regras estão em `utils/format.ts`; mude os dois juntos.
-4. UF sempre em sigla de 2 letras.
+3. O volume da embalagem vem do texto ("Bombona 20L" = 20 L, "Caixa 12x900ml" = 10,8 L): `volume_embalagem()` no banco e `volumeDaEmbalagem()` em `utils/options.ts` têm a mesma regra; mude os dois juntos.
+4. Comparações de texto usam `chave_texto` (sem acento, minúsculas, sem espaço sobrando) e de viscosidade `chave_visc` ("SAE 15W-40" = "15w40"). No front, as mesmas regras estão em `utils/format.ts`; mude os dois juntos.
+5. UF sempre em sigla de 2 letras.
 
 ## Banco de dados e segurança
 
@@ -67,6 +71,8 @@ supabase/migrations/          histórico do schema (fonte da verdade)
 - CSP em `vercel.json`: domínio externo novo precisa entrar em `connect-src` (hoje: Supabase e `nominatim.openstreetmap.org`, para cidade/UF pelo GPS).
 
 ## Convenções de código e UI
+
+- **Sessão:** os efeitos dependem de `user.id`, nunca do objeto `user`. Ao voltar para a aba, o Supabase renova o token e emite `SIGNED_IN` com um objeto novo; reagir a isso recarregava o app e apagava o formulário (`hooks/useAuth.ts`).
 
 - Iguais às do Juntto: componentes funcionais, sem bibliotecas novas sem necessidade, `autoComplete="off"` nos campos, `placeholder` em vez de valor de exemplo, `inputMode="decimal"` em valores.
 - Erros sempre via `useToast()` com `mensagemErro()`; nunca mostre o erro cru do Supabase.

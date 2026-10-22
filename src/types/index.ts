@@ -68,10 +68,53 @@ export interface Recorte {
   brasil: Estatistica | null;
 }
 
+// Comparação de um grupo de produtos: pelo mesmo SKU (embalagem) e por
+// litro/quilo (qualquer embalagem). Sempre no mesmo fluxo de venda.
+export interface Comparacao {
+  sku: Recorte;
+  litro: Recorte | null;
+}
+
 export interface Devolutiva {
   preco: number;
-  equivalente: Recorte | null;
-  viscosidade: Recorte | null;
+  volume: number | null;
+  // Todos ligados ao mesmo equivalente Evora.
+  equivalente: Comparacao | null;
+  // O mesmo produto do concorrente (marca + nome) pesquisado por outros.
+  mesmo_produto: Comparacao | null;
+}
+
+// Cadastros mantidos pelos administradores (alimentam o autocompletar).
+export interface CadMarca {
+  id: string;
+  nome: string;
+  ativo: boolean;
+  revisado: boolean;
+}
+
+export interface CadProduto {
+  id: string;
+  marca_id: string;
+  nome: string;
+  viscosidade: string | null;
+  desempenho: string | null;
+  ativo: boolean;
+  revisado: boolean;
+}
+
+export interface CadEmpresa {
+  id: string;
+  nome: string;
+  cidade: string | null;
+  uf: string | null;
+  ativo: boolean;
+  revisado: boolean;
+}
+
+export interface Cadastros {
+  marcas: CadMarca[];
+  produtos: CadProduto[];
+  empresas: CadEmpresa[];
 }
 
 // Concorrente já pesquisado por alguém (para o autocompletar).

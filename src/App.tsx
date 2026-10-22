@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ClipboardList, LayoutDashboard, Link2, Loader2, LogOut, PlusCircle } from "lucide-react";
 import { useAuth } from "./hooks/useAuth";
 import { supabase } from "./lib/supabaseClient";
-import { carregarConcorrentes, carregarPerfil, carregarProdutos, meusLancamentos } from "./lib/api";
-import type { Aba, Concorrente, Lancamento, Perfil, Produto } from "./types";
+import { carregarCadastros, carregarPerfil, carregarProdutos, meusLancamentos } from "./lib/api";
+import type { Aba, Cadastros, Lancamento, Perfil, Produto } from "./types";
 import { mensagemErro } from "./utils/erros";
 import { AuthScreen } from "./components/auth/AuthScreen";
 import { PrimeiroAcesso } from "./components/auth/PrimeiroAcesso";
@@ -21,19 +21,21 @@ function TelaCheia({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const { user, authLoading } = useAuth();
+  // Os efeitos dependem só do id: o objeto do usuário muda a cada renovação de token.
+  const userId = user?.id ?? null;
   const { showError } = useToast();
   const [perfil, setPerfil] = useState<Perfil | null | undefined>(undefined);
   const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [concorrentes, setConcorrentes] = useState<Concorrente[]>([]);
+  const [cadastros, setCadastros] = useState<Cadastros>({ marcas: [], produtos: [], empresas: [] });
   const [meus, setMeus] = useState<Lancamento[] | null>(null);
   const [aba, setAba] = useState<Aba>("lancar");
 
   const sair = () => supabase.auth.signOut();
 
   const carregarSessao = useCallback(async () => {
-    if (!user) return;
+    if (!userId) return;
     try {
-      const p = await carregarPerfil(user.id);
+      const p = await carregarPerfil(userId);
       setPerfil(p);
       // O administrador no computador abre direto no painel.
       if (p?.papel === "admin" && window.innerWidth >= 1024) setAba("painel");
@@ -41,27 +43,27 @@ export default function App() {
       showError(mensagemErro(e));
       setPerfil(null);
     }
-  }, [user, showError]);
+  }, [userId, showError]);
 
   useEffect(() => {
     setPerfil(undefined);
     setMeus(null);
-    if (user) carregarSessao();
-  }, [user, carregarSessao]);
+    if (userId) carregarSessao();
+  }, [userId, carregarSessao]);
 
   const pronto = !!perfil && perfil.ativo && !!perfil.nome;
 
   useEffect(() => {
-    if (!pronto || !user) return;
+    if (!pronto || !userId) return;
     carregarProdutos().then(setProdutos).catch((e) => showError(mensagemErro(e)));
-    carregarConcorrentes().then(setConcorrentes).catch(() => setConcorrentes([]));
-    meusLancamentos(user.id)
+    carregarCadastros().then(setCadastros).catch(() => undefined);
+    meusLancamentos(userId)
       .then(setMeus)
       .catch((e) => {
         showError(mensagemErro(e));
         setMeus([]);
       });
-  }, [pronto, user, showError]);
+  }, [pronto, userId, showError]);
 
   const trocarAba = (a: Aba) => {
     setAba(a);
@@ -114,8 +116,8 @@ export default function App() {
 
   const aoSalvar = (l: Lancamento) => {
     setMeus((atual) => (atual ? [l, ...atual.filter((x) => x.id !== l.id)] : [l]));
-    // Novo concorrente entra no autocompletar dos próximos lançamentos.
-    carregarConcorrentes().then(setConcorrentes).catch(() => undefined);
+    // Nome novo entra no cadastro pelo banco: recarrega para o autocompletar.
+    carregarCadastros().then(setCadastros).catch(() => undefined);
   };
 
   return (
@@ -154,13 +156,13 @@ export default function App() {
 
       <main className={`mx-auto px-4 pt-5 pb-28 md:pb-12 ${aba === "painel" ? "max-w-7xl" : "max-w-xl"}`}>
         {aba === "lancar" && (
-          <LancarPage perfil={perfil} produtos={produtos} concorrentes={concorrentes} onSalvo={aoSalvar} onVerMeus={() => trocarAba("meus")} />
+          <LancarPage perfil={perfil} produtos={produtos} cadastros={cadastros} onSalvo={aoSalvar} onVerMeus={() => trocarAba("meus")} />
         )}
         {aba === "meus" && (
           <MeusPrecosPage
             perfil={perfil}
             produtos={produtos}
-            concorrentes={concorrentes}
+            cadastros={cadastros}
             lancamentos={meus}
             onAlterado={aoSalvar}
             onExcluido={(id) => setMeus((atual) => atual && atual.filter((l) => l.id !== id))}
@@ -168,7 +170,9 @@ export default function App() {
           />
         )}
         {aba === "equivalencias" && <EquivalenciasPage produtos={produtos} atualizar={meus?.length} />}
-        {aba === "painel" && admin && <PainelPage perfil={perfil} produtos={produtos} concorrentes={concorrentes} />}
+        {aba === "painel" && admin && (
+          <PainelPage perfil={perfil} produtos={produtos} cadastros={cadastros} onCadastrosAlterados={() => carregarCadastros().then(setCadastros).catch(() => undefined)} />
+        )}
       </main>
 
       <nav className={`md:hidden fixed bottom-0 inset-x-0 bg-surface border-t border-line pb-safe z-40 grid ${admin ? "grid-cols-4" : "grid-cols-3"}`}>
