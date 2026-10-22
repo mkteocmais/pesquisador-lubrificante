@@ -39,7 +39,7 @@ export interface Lancamento {
   viscosidade: string | null;
   // Especificações de desempenho ("API SP, ACEA C3").
   desempenho: string | null;
-  // Fluxo de venda ("Distribuidor -> Revenda" etc.).
+  // Fluxo de venda ("Distribuidor -> Revendedor" etc., ver FLUXOS).
   cliente: string | null;
   // Embalagem pesquisada.
   sku: string | null;

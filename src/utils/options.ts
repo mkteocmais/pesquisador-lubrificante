@@ -21,12 +21,50 @@ export const VISCOSIDADES: { grupo: string; opcoes: string[] }[] = [
 
 export const TODAS_VISCOSIDADES = VISCOSIDADES.flatMap((g) => g.opcoes);
 
-export const FLUXOS = [
-  "Fábrica -> Distribuidor",
-  "Fábrica -> Consumo",
-  "Distribuidor -> Revenda",
-  "Revenda -> Consumidor Final",
+// Cadeia de venda, na ordem: cada elo só vende para quem vem depois dele.
+// O fluxo é gravado exatamente como aparece: "Vendedor -> Comprador"
+// ("Distribuidor (DA) -> Consumidor"). O retorno de preço compara pelo texto
+// exato: mudar um nome aqui exige migrar os lançamentos (ver migrações fluxos_*).
+export const ELOS: { valor: string; rotulo: string }[] = [
+  { valor: "Fábrica", rotulo: "Fábrica" },
+  { valor: "Distribuidor (DA)", rotulo: "Distribuidor (DA)" },
+  { valor: "Atacadista", rotulo: "Atacadista" },
+  { valor: "Revendedor", rotulo: "Revendedor" },
+  { valor: "Consumidor", rotulo: "Consumidor" },
 ];
+
+// O consumidor é o fim da cadeia: compra, mas não vende.
+export const VENDEDORES = ELOS.slice(0, -1);
+
+export function compradoresDe(vendedor: string) {
+  const i = ELOS.findIndex((e) => e.valor === vendedor);
+  return i < 0 ? [] : ELOS.slice(i + 1);
+}
+
+export function montarFluxo(vendedor: string, comprador: string): string {
+  return vendedor && comprador ? `${vendedor} -> ${comprador}` : "";
+}
+
+// "Distribuidor (DA) -> Consumidor" -> ["Distribuidor (DA)", "Consumidor"].
+// Compara sem os complementos entre parênteses, para também reconhecer
+// textos antigos ("Distribuidor -> Consumidor", "Atacadista (Grande Volume)").
+const semParenteses = (t: string | undefined) => chaveTexto((t || "").replace(/\(.*?\)/g, ""));
+export function separarFluxo(texto: string | null | undefined): [string, string] {
+  const [v, c] = (texto || "").split("->");
+  const achar = (nome: string | undefined) => ELOS.find((e) => semParenteses(e.valor) === semParenteses(nome))?.valor ?? "";
+  return [achar(v), achar(c)];
+}
+
+// Texto compilado do fluxo, igual ao gravado, para a tela e a planilha:
+// "Distribuidor (DA) -> Consumidor". Também normaliza textos antigos.
+export function rotuloFluxo(texto: string | null | undefined): string {
+  if (!texto) return "";
+  const [v, c] = separarFluxo(texto);
+  return v && c ? montarFluxo(v, c) : texto;
+}
+
+// Todas as combinações válidas (10), na ordem da cadeia.
+export const FLUXOS = VENDEDORES.flatMap((v) => compradoresDe(v.valor).map((c) => montarFluxo(v.valor, c.valor)));
 
 // Embalagem e o volume (L ou kg) de cada uma, para o preço por litro/quilo
 // na planilha de análise.

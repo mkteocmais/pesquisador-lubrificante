@@ -59,6 +59,7 @@ supabase/migrations/          histórico do schema (fonte da verdade)
 3. O volume da embalagem vem do texto ("Bombona 20L" = 20 L, "Caixa 12x900ml" = 10,8 L): `volume_embalagem()` no banco e `volumeDaEmbalagem()` em `utils/options.ts` têm a mesma regra; mude os dois juntos.
 4. Comparações de texto usam `chave_texto` (sem acento, minúsculas, sem espaço sobrando) e de viscosidade `chave_visc` ("SAE 15W-40" = "15w40"). No front, as mesmas regras estão em `utils/format.ts`; mude os dois juntos.
 5. UF sempre em sigla de 2 letras.
+6. **Fluxo de venda** (`cliente`): escolhido em dois campos, "Quem está vendendo?" (Fábrica, Distribuidor (DA), Atacadista, Revendedor) e "Quem está comprando?" (só quem vem depois na cadeia, até Consumidor), e gravado compilado como `"Distribuidor (DA) -> Consumidor"` (`ELOS`, `montarFluxo`, `rotuloFluxo` em `utils/options.ts`). Como o retorno compara pelo texto exato, renomear um elo exige migrar os lançamentos (ver migrações `fluxos_*`).
 
 ## Banco de dados e segurança
 
