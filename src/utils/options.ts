@@ -21,30 +21,50 @@ export const VISCOSIDADES: { grupo: string; opcoes: string[] }[] = [
 
 export const TODAS_VISCOSIDADES = VISCOSIDADES.flatMap((g) => g.opcoes);
 
-// Fluxos de venda (de -> para), um a um. O texto é gravado como está e o
-// retorno de preço só compara lançamentos do mesmo fluxo: mudar um nome aqui
-// exige migrar os lançamentos antigos (ver migração fluxos_de_venda).
-export const FLUXOS = [
-  "Fábrica -> Distribuidor (DA)",
-  "Fábrica -> Atacadista (Grande Volume)",
-  "Fábrica -> Consumidor",
-  "Fábrica -> Revendedor",
-  "Distribuidor -> Atacadista",
-  "Distribuidor -> Consumidor",
-  "Distribuidor -> Revendedor",
-  "Atacadista -> Consumidor",
-  "Atacadista -> Revendedor",
-  "Revendedor -> Consumidor",
+// Cadeia de venda, na ordem: cada elo só vende para quem vem depois dele.
+// O fluxo é gravado exatamente como aparece: "Vendedor -> Comprador"
+// ("Distribuidor (DA) -> Consumidor"). O retorno de preço compara pelo texto
+// exato: mudar um nome aqui exige migrar os lançamentos (ver migrações fluxos_*).
+export const ELOS: { valor: string; rotulo: string }[] = [
+  { valor: "Fábrica", rotulo: "Fábrica" },
+  { valor: "Distribuidor (DA)", rotulo: "Distribuidor (DA)" },
+  { valor: "Atacadista", rotulo: "Atacadista" },
+  { valor: "Revendedor", rotulo: "Revendedor" },
+  { valor: "Consumidor", rotulo: "Consumidor" },
 ];
 
-// Os mesmos fluxos agrupados por quem vende, para o seletor do formulário.
-export const FLUXOS_POR_ORIGEM: { origem: string; fluxos: string[] }[] = FLUXOS.reduce((grupos, f) => {
-  const origem = f.split(" -> ")[0];
-  const g = grupos.find((x) => x.origem === origem);
-  if (g) g.fluxos.push(f);
-  else grupos.push({ origem, fluxos: [f] });
-  return grupos;
-}, [] as { origem: string; fluxos: string[] }[]);
+// O consumidor é o fim da cadeia: compra, mas não vende.
+export const VENDEDORES = ELOS.slice(0, -1);
+
+export function compradoresDe(vendedor: string) {
+  const i = ELOS.findIndex((e) => e.valor === vendedor);
+  return i < 0 ? [] : ELOS.slice(i + 1);
+}
+
+export function montarFluxo(vendedor: string, comprador: string): string {
+  return vendedor && comprador ? `${vendedor} -> ${comprador}` : "";
+}
+
+// "Distribuidor (DA) -> Consumidor" -> ["Distribuidor (DA)", "Consumidor"].
+// Compara sem os complementos entre parênteses, para também reconhecer
+// textos antigos ("Distribuidor -> Consumidor", "Atacadista (Grande Volume)").
+const semParenteses = (t: string | undefined) => chaveTexto((t || "").replace(/\(.*?\)/g, ""));
+export function separarFluxo(texto: string | null | undefined): [string, string] {
+  const [v, c] = (texto || "").split("->");
+  const achar = (nome: string | undefined) => ELOS.find((e) => semParenteses(e.valor) === semParenteses(nome))?.valor ?? "";
+  return [achar(v), achar(c)];
+}
+
+// Texto compilado do fluxo, igual ao gravado, para a tela e a planilha:
+// "Distribuidor (DA) -> Consumidor". Também normaliza textos antigos.
+export function rotuloFluxo(texto: string | null | undefined): string {
+  if (!texto) return "";
+  const [v, c] = separarFluxo(texto);
+  return v && c ? montarFluxo(v, c) : texto;
+}
+
+// Todas as combinações válidas (10), na ordem da cadeia.
+export const FLUXOS = VENDEDORES.flatMap((v) => compradoresDe(v.valor).map((c) => montarFluxo(v.valor, c.valor)));
 
 // Embalagem e o volume (L ou kg) de cada uma, para o preço por litro/quilo
 // na planilha de análise.

@@ -1,6 +1,6 @@
 import type { Lancamento, Perfil, Produto } from "../types";
 import { chaveTexto } from "./format";
-import { volumeDaEmbalagem } from "./options";
+import { rotuloFluxo, volumeDaEmbalagem } from "./options";
 import { Aba, gerarXlsx } from "./xlsx";
 
 export interface Contexto {
@@ -102,7 +102,7 @@ export function planilhaLancamentos(lancamentos: Lancamento[], ctx: Contexto): B
         l.viscosidade,
         l.desempenho,
         l.sku || l.unidade,
-        l.cliente?.replace("->", "→"),
+        rotuloFluxo(l.cliente),
         l.preco,
         emb?.volume ?? null,
         emb?.unidade ?? null,
@@ -181,7 +181,7 @@ export function planilhaLancamentos(lancamentos: Lancamento[], ctx: Contexto): B
         r.eq,
         r.visc,
         r.emb,
-        r.fluxo.replace("->", "→"),
+        rotuloFluxo(r.fluxo),
         r.uf,
         r.precos.length,
         Math.min(...r.precos),

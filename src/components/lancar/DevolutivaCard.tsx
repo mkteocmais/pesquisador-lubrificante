@@ -3,7 +3,7 @@ import { AlertTriangle, Loader2, Minus, TrendingDown, TrendingUp } from "lucide-
 import { devolutiva as buscarDevolutiva } from "../../lib/api";
 import type { Comparacao, Devolutiva, Estatistica, Lancamento, Produto } from "../../types";
 import { formatBRL, formatPct, variacao } from "../../utils/format";
-import { volumeDaEmbalagem } from "../../utils/options";
+import { rotuloFluxo, volumeDaEmbalagem } from "../../utils/options";
 
 interface Props {
   lancamento: Lancamento;
@@ -24,7 +24,7 @@ interface Linha {
 // O retorno ao vendedor: como o preço lançado se compara com pesquisas
 // COMPARÁVEIS. Só entram produtos ligados ao mesmo equivalente Evora (ou o
 // mesmo produto do concorrente) e sempre o mesmo fluxo de venda, porque
-// Fábrica -> Distribuidor (DA) e Distribuidor -> Revendedor têm preços muito
+// Fábrica -> Distribuidor (DA) e Distribuidor (DA) -> Revendedor têm preços muito
 // diferentes. Mostra por embalagem (mesmo SKU) e por litro/quilo, no estado
 // e no Brasil.
 export function DevolutivaCard({ lancamento, equivalente }: Props) {
@@ -64,7 +64,7 @@ export function DevolutivaCard({ lancamento, equivalente }: Props) {
   const vol = volumeDaEmbalagem(lancamento.sku);
   const unidade = vol?.unidade ?? "L";
   const precoUnit = vol ? lancamento.preco / vol.volume : null;
-  const fluxo = (lancamento.cliente || "sem fluxo").replace("->", "→");
+  const fluxo = rotuloFluxo(lancamento.cliente) || "sem fluxo";
 
   const linhasDe = (c: Comparacao | null): Linha[] => {
     if (!c) return [];

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Download, Search, X } from "lucide-react";
 import type { Cadastros, Lancamento, Perfil, Produto } from "../../types";
 import { chaveTexto, dataLocalISO, formatBRL, formatData } from "../../utils/format";
+import { rotuloFluxo } from "../../utils/options";
 import { autorDe, planilhaLancamentos } from "../../utils/exportar";
 import { baixarArquivo } from "../../utils/xlsx";
 import { theme } from "../../utils/theme";
@@ -162,7 +163,7 @@ export function LancamentosAdmin({ dados, perfil, produtos, cadastros, onAlterad
             <option value="">Fluxo: todos</option>
             {listas.fluxos.map((v) => (
               <option key={v} value={v}>
-                {v.replace("->", "→")}
+                {rotuloFluxo(v)}
               </option>
             ))}
           </select>
@@ -236,7 +237,7 @@ export function LancamentosAdmin({ dados, perfil, produtos, cadastros, onAlterad
                     <td className="px-3 py-2 max-w-[200px] truncate">{l.produto}</td>
                     <td className="px-3 py-2 whitespace-nowrap">{l.viscosidade}</td>
                     <td className="px-3 py-2 whitespace-nowrap">{l.sku || l.unidade}</td>
-                    <td className="px-3 py-2 whitespace-nowrap text-muted">{l.cliente?.replace("->", "→")}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-muted">{rotuloFluxo(l.cliente)}</td>
                     <td className="px-3 py-2 whitespace-nowrap text-right font-semibold tabular-nums">{formatBRL(l.preco)}</td>
                     <td className="px-3 py-2 max-w-[240px] truncate">
                       {nomeEq(l.produto_ref_id) ?? <span className="text-amber-700">—</span>}

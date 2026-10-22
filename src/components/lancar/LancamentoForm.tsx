@@ -3,7 +3,7 @@ import { Camera, Image as ImageIcon, Loader2, MapPin, X } from "lucide-react";
 import type { CadEmpresa, CadProduto, Cadastros, Lancamento, NovoLancamento, Perfil, Produto } from "../../types";
 import { salvarLancamento, sugerirEquivalente } from "../../lib/api";
 import { buscarLocal } from "../../utils/localizacao";
-import { DESEMPENHOS, EMBALAGENS, FLUXOS, FLUXOS_POR_ORIGEM, MARCAS_BASE, TODAS_VISCOSIDADES, UFS, VISCOSIDADES, separarDesempenho, volumeDaEmbalagem } from "../../utils/options";
+import { DESEMPENHOS, EMBALAGENS, MARCAS_BASE, VENDEDORES, compradoresDe, montarFluxo, separarFluxo, TODAS_VISCOSIDADES, UFS, VISCOSIDADES, separarDesempenho, volumeDaEmbalagem } from "../../utils/options";
 import { chaveTexto, parsePreco, precoParaTexto } from "../../utils/format";
 import { mensagemErro } from "../../utils/erros";
 import { theme, textStyles } from "../../utils/theme";
@@ -58,7 +58,9 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
   const [produtoRef, setProdutoRef] = useState<string | null>(inicial?.produto_ref_id ?? null);
   const [sugestoes, setSugestoes] = useState<{ produto_id: string; usos: number }[]>([]);
 
-  const [fluxo, setFluxo] = useState(inicial?.cliente ?? "");
+  const [quemVende, setQuemVende] = useState(() => separarFluxo(inicial?.cliente)[0]);
+  const [quemCompra, setQuemCompra] = useState(() => separarFluxo(inicial?.cliente)[1]);
+  const compradores = compradoresDe(quemVende);
   const [embalagem, setEmbalagem] = useState(inicial?.sku ?? "");
   const [preco, setPreco] = useState(precoParaTexto(inicial?.preco));
 
@@ -165,7 +167,9 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
   if (!estado) faltando.push("UF");
   if (!marca.trim()) faltando.push("marca");
   if (!produto.trim()) faltando.push("produto");
-  if (!fluxo) faltando.push("fluxo de venda");
+  const fluxo = montarFluxo(quemVende, quemCompra);
+  if (!quemVende) faltando.push("quem está vendendo");
+  if (!quemCompra) faltando.push("quem está comprando");
   if (!embFinal) faltando.push("embalagem");
   if (!(precoNum > 0)) faltando.push("preço");
 
@@ -368,22 +372,47 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
 
       <section className="space-y-4">
         <h2 className={textStyles.section}>Preço</h2>
-        <Campo label="Fluxo de venda (de → para)" htmlFor="f-fluxo">
-          <select id="f-fluxo" className={theme.select + erro(!fluxo)} value={fluxo} onChange={(e) => setFluxo(e.target.value)}>
-            <option value="">Selecione...</option>
-            {FLUXOS_POR_ORIGEM.map((g) => (
-              <optgroup key={g.origem} label={`Vendido por: ${g.origem}`}>
-                {g.fluxos.map((f) => (
-                  <option key={f} value={f}>
-                    {f.replace("->", "→")}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-            {/* Lançamento antigo com fluxo fora da lista: mantém o valor ao corrigir. */}
-            {fluxo && !FLUXOS.includes(fluxo) && <option value={fluxo}>{fluxo.replace("->", "→")}</option>}
-          </select>
-        </Campo>
+        {/* Fluxo de venda em dois passos: quem vende e, depois, para quem
+            (só quem vem depois na cadeia Fábrica → Distribuidor → Atacadista
+            → Revendedor → Consumidor). */}
+        <div className="grid grid-cols-2 gap-3">
+          <Campo label="Quem está vendendo?" htmlFor="f-vende">
+            <select
+              id="f-vende"
+              className={theme.select + erro(!quemVende)}
+              value={quemVende}
+              onChange={(e) => {
+                const v = e.target.value;
+                setQuemVende(v);
+                // Comprador que não vem depois do novo vendedor deixa de valer.
+                if (!compradoresDe(v).some((c) => c.valor === quemCompra)) setQuemCompra("");
+              }}
+            >
+              <option value="">Selecione...</option>
+              {VENDEDORES.map((e) => (
+                <option key={e.valor} value={e.valor}>
+                  {e.rotulo}
+                </option>
+              ))}
+            </select>
+          </Campo>
+          <Campo label="Quem está comprando?" htmlFor="f-compra">
+            <select
+              id="f-compra"
+              className={theme.select + erro(!quemCompra)}
+              value={quemCompra}
+              disabled={!quemVende}
+              onChange={(e) => setQuemCompra(e.target.value)}
+            >
+              <option value="">{quemVende ? "Selecione..." : "Escolha quem vende"}</option>
+              {compradores.map((e) => (
+                <option key={e.valor} value={e.valor}>
+                  {e.rotulo}
+                </option>
+              ))}
+            </select>
+          </Campo>
+        </div>
         <Campo label="Embalagem" htmlFor="f-emb">
           <Autocompletar
             id="f-emb"

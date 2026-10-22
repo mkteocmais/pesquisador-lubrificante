@@ -3,6 +3,7 @@ import { Loader2, Pencil, Trash2 } from "lucide-react";
 import type { Cadastros, Lancamento, Perfil, Produto } from "../../types";
 import { excluirLancamento } from "../../lib/api";
 import { formatBRL, formatData } from "../../utils/format";
+import { rotuloFluxo } from "../../utils/options";
 import { mensagemErro } from "../../utils/erros";
 import { Modal } from "../common/Modal";
 import { useToast } from "../common/ToastProvider";
@@ -70,7 +71,7 @@ export function LancamentoDetalhe({ lancamento: l, perfil, produtos, cadastros, 
     ["Viscosidade", l.viscosidade],
     ["Desempenho", l.desempenho],
     ["Embalagem", l.sku || l.unidade],
-    ["Fluxo de venda", l.cliente?.replace("->", "→")],
+    ["Fluxo de venda", rotuloFluxo(l.cliente)],
     ["Equivalente Grupo Pax", equivalente?.nome ?? "Não informado"],
   ];
 
