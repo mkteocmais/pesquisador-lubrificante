@@ -26,8 +26,13 @@ export function useAuth(): UseAuthResult {
       setAuthLoading(false);
     });
 
+    // Ao voltar para a aba (Alt+Tab), o Supabase renova o token e avisa de novo
+    // com o MESMO usuário em um objeto novo. Trocar o estado nesse caso fazia o
+    // app recarregar tudo e perder o que estava sendo digitado; por isso só
+    // atualiza quando o usuário realmente muda (login, logout ou outra conta).
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const proximo = session?.user ?? null;
+      setUser((atual) => (atual?.id === proximo?.id ? atual : proximo));
     });
 
     return () => {

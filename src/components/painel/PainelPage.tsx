@@ -1,21 +1,22 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader2, RefreshCw } from "lucide-react";
-import type { Concorrente, Lancamento, Perfil, Produto } from "../../types";
+import type { Cadastros, Lancamento, Perfil, Produto } from "../../types";
 import { carregarPerfis, todosLancamentos } from "../../lib/api";
 import { mensagemErro } from "../../utils/erros";
-import { textStyles } from "../../utils/theme";
 import { useToast } from "../common/ToastProvider";
 import { TituloPagina } from "../common/Marca";
+import { CadastrosAdmin } from "./CadastrosAdmin";
 import { EquivalenciasAdmin } from "./EquivalenciasAdmin";
 import { LancamentosAdmin } from "./LancamentosAdmin";
 import { VendedoresAdmin } from "./VendedoresAdmin";
 
-type Sub = "lancamentos" | "equivalencias" | "vendedores";
+type Sub = "lancamentos" | "equivalencias" | "cadastros" | "vendedores";
 
 interface Props {
   perfil: Perfil;
   produtos: Produto[];
-  concorrentes: Concorrente[];
+  cadastros: Cadastros;
+  onCadastrosAlterados: () => void;
 }
 
 export interface DadosPainel {
@@ -28,7 +29,7 @@ export interface DadosPainel {
 // Painel do administrador (pensado para o computador, mas funciona no celular):
 // todos os lançamentos com filtros e download em Excel, a base de
 // equivalências e os vendedores.
-export function PainelPage({ perfil, produtos, concorrentes }: Props) {
+export function PainelPage({ perfil, produtos, cadastros, onCadastrosAlterados }: Props) {
   const { showError } = useToast();
   const [sub, setSub] = useState<Sub>("lancamentos");
   const [lancamentos, setLancamentos] = useState<Lancamento[] | null>(null);
@@ -73,6 +74,7 @@ export function PainelPage({ perfil, produtos, concorrentes }: Props) {
   const abas: [Sub, string][] = [
     ["lancamentos", "Lançamentos"],
     ["equivalencias", "Gerir equivalências"],
+    ["cadastros", "Cadastros"],
     ["vendedores", "Vendedores"],
   ];
 
@@ -111,12 +113,22 @@ export function PainelPage({ perfil, produtos, concorrentes }: Props) {
           dados={dados}
           perfil={perfil}
           produtos={produtos}
-          concorrentes={concorrentes}
+          cadastros={cadastros}
           onAlterado={(l) => atualizarLocal([l])}
           onExcluido={(id) => setLancamentos((atual) => atual && atual.filter((l) => l.id !== id))}
         />
       ) : sub === "equivalencias" ? (
         <EquivalenciasAdmin dados={dados} produtos={produtos} onAlterados={atualizarLocal} />
+      ) : sub === "cadastros" ? (
+        <CadastrosAdmin
+          cadastros={cadastros}
+          lancamentos={dados.lancamentos}
+          onAlterado={() => {
+            // Corrigir um nome muda os lançamentos também: recarrega os dois.
+            onCadastrosAlterados();
+            recarregar();
+          }}
+        />
       ) : (
         <VendedoresAdmin dados={dados} perfil={perfil} onAlterados={atualizarLocal} onPerfisAlterados={recarregar} />
       )}

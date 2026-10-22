@@ -71,6 +71,34 @@ export function embalagemInfo(nome: string | null | undefined) {
   return EMBALAGENS.find((e) => chaveTexto(e.nome) === k) ?? null;
 }
 
+// Volume em litros ou quilos lido do texto da embalagem ("Bombona 20L" = 20 L,
+// "Caixa 12x900ml" = 10,8 L, "Bisnaga 80g" = 0,08 kg). Mesma regra de
+// public.volume_embalagem() no banco: mude os dois juntos.
+export function volumeDaEmbalagem(nome: string | null | undefined): { volume: number; unidade: "L" | "kg" } | null {
+  const t = (nome || "").toLowerCase().replace(/,/g, ".");
+  const un = "(ml|litros?|lts?|l|kgs?|gr|g)(?![a-z])";
+  const num = "(\\d+(?:\\.\\d+)?(?:/\\d+)?)";
+  let qtd = 1;
+  let txt: string;
+  let u: string;
+  const multi = new RegExp(`(\\d+)\\s*x\\s*${num}\\s*${un}`).exec(t);
+  if (multi) {
+    qtd = Number(multi[1]);
+    txt = multi[2];
+    u = multi[3];
+  } else {
+    const simples = new RegExp(`${num}\\s*${un}`).exec(t);
+    if (!simples) return null;
+    txt = simples[1];
+    u = simples[2];
+  }
+  let valor = txt.includes("/") ? Number(txt.split("/")[0]) / Number(txt.split("/")[1]) : Number(txt);
+  if (["ml", "g", "gr"].includes(u)) valor = valor / 1000;
+  const volume = Math.round(qtd * valor * 10000) / 10000;
+  if (!Number.isFinite(volume) || volume <= 0) return null;
+  return { volume, unidade: /^(kg|kgs|g|gr)$/.test(u) ? "kg" : "L" };
+}
+
 export const UFS: { sigla: string; nome: string }[] = [
   { sigla: "AC", nome: "Acre" },
   { sigla: "AL", nome: "Alagoas" },

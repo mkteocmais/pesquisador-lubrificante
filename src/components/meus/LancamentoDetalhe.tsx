@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Loader2, Pencil, Trash2 } from "lucide-react";
-import type { Concorrente, Lancamento, Perfil, Produto } from "../../types";
+import type { Cadastros, Lancamento, Perfil, Produto } from "../../types";
 import { excluirLancamento } from "../../lib/api";
 import { formatBRL, formatData } from "../../utils/format";
 import { mensagemErro } from "../../utils/erros";
@@ -13,7 +13,7 @@ interface Props {
   lancamento: Lancamento;
   perfil: Perfil;
   produtos: Produto[];
-  concorrentes: Concorrente[];
+  cadastros: Cadastros;
   // Nome de quem lançou (o administrador vê lançamentos de todos).
   autor?: string;
   onFechar: () => void;
@@ -22,7 +22,7 @@ interface Props {
 }
 
 // Detalhe de um lançamento: dados, foto, retorno de preço, editar e apagar.
-export function LancamentoDetalhe({ lancamento: l, perfil, produtos, concorrentes, autor, onFechar, onAlterado, onExcluido }: Props) {
+export function LancamentoDetalhe({ lancamento: l, perfil, produtos, cadastros, autor, onFechar, onAlterado, onExcluido }: Props) {
   const { showError, showSuccess } = useToast();
   const [editando, setEditando] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
@@ -47,7 +47,7 @@ export function LancamentoDetalhe({ lancamento: l, perfil, produtos, concorrente
         <LancamentoForm
           perfil={perfil}
           produtos={produtos}
-          concorrentes={concorrentes}
+          cadastros={cadastros}
           inicial={l}
           onCancelar={() => setEditando(false)}
           onSalvo={(novo) => {

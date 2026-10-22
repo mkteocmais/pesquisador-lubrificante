@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { Loader2, Search } from "lucide-react";
-import type { Concorrente, Lancamento, Perfil, Produto } from "../../types";
+import type { Cadastros, Lancamento, Perfil, Produto } from "../../types";
 import { chaveTexto, formatBRL, formatData } from "../../utils/format";
 import { theme, textStyles } from "../../utils/theme";
 import { EmptyState } from "../common/EmptyState";
+import { ListaRolavel } from "../common/ListaRolavel";
 import { TituloPagina } from "../common/Marca";
 import { LancamentoDetalhe } from "./LancamentoDetalhe";
 import { RankingEnvios } from "./RankingEnvios";
@@ -11,7 +12,7 @@ import { RankingEnvios } from "./RankingEnvios";
 interface Props {
   perfil: Perfil;
   produtos: Produto[];
-  concorrentes: Concorrente[];
+  cadastros: Cadastros;
   lancamentos: Lancamento[] | null;
   onAlterado: (l: Lancamento) => void;
   onExcluido: (id: string) => void;
@@ -47,7 +48,7 @@ export function LancamentoItem({ l, equivalente, autor, onClick }: { l: Lancamen
 
 // "Meus preços": tudo o que o vendedor lançou, com busca, período e o retorno
 // de preço de cada um.
-export function MeusPrecosPage({ perfil, produtos, concorrentes, lancamentos, onAlterado, onExcluido, onLancar }: Props) {
+export function MeusPrecosPage({ perfil, produtos, cadastros, lancamentos, onAlterado, onExcluido, onLancar }: Props) {
   const [busca, setBusca] = useState("");
   const [periodo, setPeriodo] = useState<Periodo>("90");
   const [aberto, setAberto] = useState<Lancamento | null>(null);
@@ -151,16 +152,18 @@ export function MeusPrecosPage({ perfil, produtos, concorrentes, lancamentos, on
           {filtrados.length === 0 ? (
             <EmptyState title="Nada encontrado" description="Tente outro período ou outra busca." />
           ) : (
-            <ul className="bg-surface border border-line rounded-lg divide-y divide-line overflow-hidden">
-              {filtrados.map((l) => (
+            <ListaRolavel
+              itens={filtrados}
+              chave={(l) => l.id}
+              reiniciarQuando={`${busca}|${periodo}`}
+              render={(l) => (
                 <LancamentoItem
-                  key={l.id}
                   l={l}
                   equivalente={l.produto_ref_id ? nomeProduto.get(l.produto_ref_id) : undefined}
                   onClick={() => setAberto(l)}
                 />
-              ))}
-            </ul>
+              )}
+            />
           )}
         </>
       )}
@@ -170,7 +173,7 @@ export function MeusPrecosPage({ perfil, produtos, concorrentes, lancamentos, on
           lancamento={aberto}
           perfil={perfil}
           produtos={produtos}
-          concorrentes={concorrentes}
+          cadastros={cadastros}
           onFechar={() => setAberto(null)}
           onAlterado={(novo) => {
             onAlterado(novo);

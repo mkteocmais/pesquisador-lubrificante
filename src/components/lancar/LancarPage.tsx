@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
-import type { Concorrente, Lancamento, Perfil, Produto } from "../../types";
+import type { Cadastros, Lancamento, Perfil, Produto } from "../../types";
 import { formatBRL } from "../../utils/format";
 import { theme, textStyles } from "../../utils/theme";
 import { TituloPagina } from "../common/Marca";
@@ -10,12 +10,12 @@ import { LancamentoForm, LocalPesquisa } from "./LancamentoForm";
 interface Props {
   perfil: Perfil;
   produtos: Produto[];
-  concorrentes: Concorrente[];
+  cadastros: Cadastros;
   onSalvo: (l: Lancamento) => void;
   onVerMeus: () => void;
 }
 
-export function LancarPage({ perfil, produtos, concorrentes, onSalvo, onVerMeus }: Props) {
+export function LancarPage({ perfil, produtos, cadastros, onSalvo, onVerMeus }: Props) {
   const [salvo, setSalvo] = useState<Lancamento | null>(null);
   const [local, setLocal] = useState<LocalPesquisa | null>(null);
   // Muda a key para o formulário começar do zero.
@@ -65,7 +65,7 @@ export function LancarPage({ perfil, produtos, concorrentes, onSalvo, onVerMeus 
         key={rodada}
         perfil={perfil}
         produtos={produtos}
-        concorrentes={concorrentes}
+        cadastros={cadastros}
         local={local}
         onSalvo={(l, loc) => {
           setSalvo(l);
