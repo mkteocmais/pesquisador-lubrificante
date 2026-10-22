@@ -21,12 +21,30 @@ export const VISCOSIDADES: { grupo: string; opcoes: string[] }[] = [
 
 export const TODAS_VISCOSIDADES = VISCOSIDADES.flatMap((g) => g.opcoes);
 
+// Fluxos de venda (de -> para), um a um. O texto é gravado como está e o
+// retorno de preço só compara lançamentos do mesmo fluxo: mudar um nome aqui
+// exige migrar os lançamentos antigos (ver migração fluxos_de_venda).
 export const FLUXOS = [
-  "Fábrica -> Distribuidor",
-  "Fábrica -> Consumo",
-  "Distribuidor -> Revenda",
-  "Revenda -> Consumidor Final",
+  "Fábrica -> Distribuidor (DA)",
+  "Fábrica -> Atacadista (Grande Volume)",
+  "Fábrica -> Consumidor",
+  "Fábrica -> Revendedor",
+  "Distribuidor -> Atacadista",
+  "Distribuidor -> Consumidor",
+  "Distribuidor -> Revendedor",
+  "Atacadista -> Consumidor",
+  "Atacadista -> Revendedor",
+  "Revendedor -> Consumidor",
 ];
+
+// Os mesmos fluxos agrupados por quem vende, para o seletor do formulário.
+export const FLUXOS_POR_ORIGEM: { origem: string; fluxos: string[] }[] = FLUXOS.reduce((grupos, f) => {
+  const origem = f.split(" -> ")[0];
+  const g = grupos.find((x) => x.origem === origem);
+  if (g) g.fluxos.push(f);
+  else grupos.push({ origem, fluxos: [f] });
+  return grupos;
+}, [] as { origem: string; fluxos: string[] }[]);
 
 // Embalagem e o volume (L ou kg) de cada uma, para o preço por litro/quilo
 // na planilha de análise.

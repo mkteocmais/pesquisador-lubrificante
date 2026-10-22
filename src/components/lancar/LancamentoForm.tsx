@@ -3,7 +3,7 @@ import { Camera, Image as ImageIcon, Loader2, MapPin, X } from "lucide-react";
 import type { CadEmpresa, CadProduto, Cadastros, Lancamento, NovoLancamento, Perfil, Produto } from "../../types";
 import { salvarLancamento, sugerirEquivalente } from "../../lib/api";
 import { buscarLocal } from "../../utils/localizacao";
-import { DESEMPENHOS, EMBALAGENS, FLUXOS, MARCAS_BASE, TODAS_VISCOSIDADES, UFS, VISCOSIDADES, separarDesempenho, volumeDaEmbalagem } from "../../utils/options";
+import { DESEMPENHOS, EMBALAGENS, FLUXOS, FLUXOS_POR_ORIGEM, MARCAS_BASE, TODAS_VISCOSIDADES, UFS, VISCOSIDADES, separarDesempenho, volumeDaEmbalagem } from "../../utils/options";
 import { chaveTexto, parsePreco, precoParaTexto } from "../../utils/format";
 import { mensagemErro } from "../../utils/erros";
 import { theme, textStyles } from "../../utils/theme";
@@ -371,11 +371,17 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
         <Campo label="Fluxo de venda (de → para)" htmlFor="f-fluxo">
           <select id="f-fluxo" className={theme.select + erro(!fluxo)} value={fluxo} onChange={(e) => setFluxo(e.target.value)}>
             <option value="">Selecione...</option>
-            {FLUXOS.map((f) => (
-              <option key={f} value={f}>
-                {f.replace("->", "→")}
-              </option>
+            {FLUXOS_POR_ORIGEM.map((g) => (
+              <optgroup key={g.origem} label={`Vendido por: ${g.origem}`}>
+                {g.fluxos.map((f) => (
+                  <option key={f} value={f}>
+                    {f.replace("->", "→")}
+                  </option>
+                ))}
+              </optgroup>
             ))}
+            {/* Lançamento antigo com fluxo fora da lista: mantém o valor ao corrigir. */}
+            {fluxo && !FLUXOS.includes(fluxo) && <option value={fluxo}>{fluxo.replace("->", "→")}</option>}
           </select>
         </Campo>
         <Campo label="Embalagem" htmlFor="f-emb">
