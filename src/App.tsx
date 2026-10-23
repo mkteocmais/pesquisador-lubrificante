@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ClipboardList, LayoutDashboard, Link2, Loader2, LogOut, PlusCircle } from "lucide-react";
 import { useAuth } from "./hooks/useAuth";
 import { supabase } from "./lib/supabaseClient";
-import { carregarCadastros, carregarPerfil, carregarProdutos, meusLancamentos } from "./lib/api";
+import { carregarCadastros, carregarPerfil, carregarPerfis, carregarProdutos, meusLancamentos, todosLancamentos } from "./lib/api";
 import type { Aba, Cadastros, Lancamento, Perfil, Produto } from "./types";
 import { mensagemErro } from "./utils/erros";
 import { AuthScreen } from "./components/auth/AuthScreen";
@@ -28,6 +28,8 @@ export default function App() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [cadastros, setCadastros] = useState<Cadastros>({ marcas: [], produtos: [], empresas: [] });
   const [meus, setMeus] = useState<Lancamento[] | null>(null);
+  // Só para o administrador: nomes de quem lançou, em "Meus preços".
+  const [perfis, setPerfis] = useState<Perfil[]>([]);
   const [aba, setAba] = useState<Aba>("lancar");
 
   const sair = () => supabase.auth.signOut();
@@ -52,18 +54,22 @@ export default function App() {
   }, [userId, carregarSessao]);
 
   const pronto = !!perfil && perfil.ativo && !!perfil.nome;
+  const ehAdmin = perfil?.papel === "admin";
 
   useEffect(() => {
     if (!pronto || !userId) return;
     carregarProdutos().then(setProdutos).catch((e) => showError(mensagemErro(e)));
     carregarCadastros().then(setCadastros).catch(() => undefined);
-    meusLancamentos(userId)
+    // O administrador vê em "Meus preços" os lançamentos de todos os
+    // vendedores (a RLS já libera a leitura para ele); o vendedor, só os seus.
+    (ehAdmin ? todosLancamentos() : meusLancamentos(userId))
       .then(setMeus)
       .catch((e) => {
         showError(mensagemErro(e));
         setMeus([]);
       });
-  }, [pronto, userId, showError]);
+    if (ehAdmin) carregarPerfis().then(setPerfis).catch(() => undefined);
+  }, [pronto, userId, ehAdmin, showError]);
 
   const trocarAba = (a: Aba) => {
     setAba(a);
@@ -161,6 +167,7 @@ export default function App() {
         {aba === "meus" && (
           <MeusPrecosPage
             perfil={perfil}
+            perfis={admin ? perfis : undefined}
             produtos={produtos}
             cadastros={cadastros}
             lancamentos={meus}
