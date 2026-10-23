@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Loader2, Search } from "lucide-react";
 import type { Cadastros, Lancamento, Perfil, Produto } from "../../types";
+import { autorDe } from "../../utils/exportar";
 import { chaveTexto, formatBRL, formatData } from "../../utils/format";
 import { theme, textStyles } from "../../utils/theme";
 import { EmptyState } from "../common/EmptyState";
@@ -11,6 +12,8 @@ import { RankingEnvios } from "./RankingEnvios";
 
 interface Props {
   perfil: Perfil;
+  // Só o administrador recebe: aí a lista traz os lançamentos de todos.
+  perfis?: Perfil[];
   produtos: Produto[];
   cadastros: Cadastros;
   lancamentos: Lancamento[] | null;
@@ -20,6 +23,9 @@ interface Props {
 }
 
 type Periodo = "30" | "90" | "tudo";
+
+// Filtro de vendedor do administrador: "" = todos, MEUS = só os dele.
+const MEUS = "__meus";
 
 export function LancamentoItem({ l, equivalente, autor, onClick }: { l: Lancamento; equivalente?: string; autor?: string; onClick: () => void }) {
   return (
@@ -47,36 +53,67 @@ export function LancamentoItem({ l, equivalente, autor, onClick }: { l: Lancamen
 }
 
 // "Meus preços": tudo o que o vendedor lançou, com busca, período e o retorno
-// de preço de cada um.
-export function MeusPrecosPage({ perfil, produtos, cadastros, lancamentos, onAlterado, onExcluido, onLancar }: Props) {
+// de preço de cada um. O administrador vê aqui os preços de todos os
+// vendedores, com o nome de quem lançou e filtro por vendedor.
+export function MeusPrecosPage({ perfil, perfis, produtos, cadastros, lancamentos, onAlterado, onExcluido, onLancar }: Props) {
+  const admin = !!perfis;
   const [busca, setBusca] = useState("");
   const [periodo, setPeriodo] = useState<Periodo>("90");
+  const [vendedor, setVendedor] = useState("");
   const [aberto, setAberto] = useState<Lancamento | null>(null);
   const nomeProduto = useMemo(() => new Map(produtos.map((p) => [p.id, p.nome])), [produtos]);
+  const perfisPorId = useMemo(() => new Map((perfis ?? []).map((p) => [p.id, p])), [perfis]);
+  const autor = (l: Lancamento) => (admin ? autorDe(l, perfisPorId) : undefined);
+
+  const vendedores = useMemo(() => {
+    if (!admin || !lancamentos) return [];
+    const nomes = new Map<string, string>();
+    for (const l of lancamentos) {
+      const n = autorDe(l, perfisPorId);
+      if (n !== "—" && !nomes.has(chaveTexto(n))) nomes.set(chaveTexto(n), n);
+    }
+    return Array.from(nomes.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [admin, lancamentos, perfisPorId]);
+
+  // Lançamentos do vendedor escolhido (o resumo e a lista partem daqui).
+  const base = useMemo(() => {
+    if (!lancamentos) return [];
+    if (!admin || !vendedor) return lancamentos;
+    if (vendedor === MEUS) return lancamentos.filter((l) => l.user_id === perfil.id);
+    return lancamentos.filter((l) => chaveTexto(autorDe(l, perfisPorId)) === chaveTexto(vendedor));
+  }, [lancamentos, admin, vendedor, perfil.id, perfisPorId]);
 
   const filtrados = useMemo(() => {
-    if (!lancamentos) return [];
     const limite = periodo === "tudo" ? 0 : Date.now() - Number(periodo) * 86400000;
     const termos = chaveTexto(busca).split(" ").filter(Boolean);
-    return lancamentos.filter((l) => {
+    return base.filter((l) => {
       if (limite && new Date(l.created_at).getTime() < limite) return false;
       if (!termos.length) return true;
       const alvo = chaveTexto(
-        [l.marca, l.produto, l.viscosidade, l.empresa, l.cidade, l.sku, l.produto_ref_id ? nomeProduto.get(l.produto_ref_id) : ""].join(" ")
+        [
+          l.marca,
+          l.produto,
+          l.viscosidade,
+          l.empresa,
+          l.cidade,
+          l.sku,
+          l.produto_ref_id ? nomeProduto.get(l.produto_ref_id) : "",
+          admin ? autorDe(l, perfisPorId) : "",
+        ].join(" ")
       );
       return termos.every((t) => alvo.includes(t));
     });
-  }, [lancamentos, busca, periodo, nomeProduto]);
+  }, [base, busca, periodo, nomeProduto, admin, perfisPorId]);
 
   const resumo = useMemo(() => {
-    const lista = lancamentos ?? [];
+    const lista = base;
     const inicioMes = new Date();
     inicioMes.setDate(1);
     inicioMes.setHours(0, 0, 0, 0);
     const doMes = lista.filter((l) => new Date(l.created_at) >= inicioMes).length;
     const comEquiv = lista.filter((l) => l.produto_ref_id).length;
     return { doMes, total: lista.length, comEquiv };
-  }, [lancamentos]);
+  }, [base]);
 
   if (!lancamentos) {
     return (
@@ -88,7 +125,28 @@ export function MeusPrecosPage({ perfil, produtos, cadastros, lancamentos, onAlt
 
   return (
     <div className="space-y-5">
-      <TituloPagina sobre="Histórico" titulo="Meus preços" />
+      {admin ? (
+        <TituloPagina sobre="Todos os vendedores" titulo="Preços lançados" />
+      ) : (
+        <TituloPagina sobre="Histórico" titulo="Meus preços" />
+      )}
+
+      {admin && (
+        <div>
+          <label htmlFor="f-vendedor" className={`${textStyles.label} block mb-1.5`}>
+            Vendedor
+          </label>
+          <select id="f-vendedor" className={theme.input} value={vendedor} onChange={(e) => setVendedor(e.target.value)}>
+            <option value="">Todos os vendedores</option>
+            <option value={MEUS}>Só os meus</option>
+            {vendedores.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-3">
         {[
@@ -105,10 +163,12 @@ export function MeusPrecosPage({ perfil, produtos, cadastros, lancamentos, onAlt
 
       <RankingEnvios atualizar={lancamentos.length} />
 
-      {lancamentos.length === 0 ? (
+      {base.length === 0 ? (
         <EmptyState
           title="Nenhum preço lançado ainda"
-          description="Os preços que você lançar aparecem aqui, com a comparação com o mercado."
+          description={
+            admin ? "Os preços lançados pelos vendedores aparecem aqui." : "Os preços que você lançar aparecem aqui, com a comparação com o mercado."
+          }
           action={
             <button onClick={onLancar} className="bg-brand text-white px-6 py-3 rounded-md text-sm font-semibold">
               Lançar o primeiro
@@ -123,8 +183,8 @@ export function MeusPrecosPage({ perfil, produtos, cadastros, lancamentos, onAlt
               <input
                 autoComplete="off"
                 className={theme.input + " pl-11"}
-                placeholder="Buscar marca, produto, empresa..."
-                aria-label="Buscar nos meus preços"
+                placeholder={admin ? "Buscar marca, produto, empresa, vendedor..." : "Buscar marca, produto, empresa..."}
+                aria-label="Buscar nos preços"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
               />
@@ -155,11 +215,12 @@ export function MeusPrecosPage({ perfil, produtos, cadastros, lancamentos, onAlt
             <ListaRolavel
               itens={filtrados}
               chave={(l) => l.id}
-              reiniciarQuando={`${busca}|${periodo}`}
+              reiniciarQuando={`${busca}|${periodo}|${vendedor}`}
               render={(l) => (
                 <LancamentoItem
                   l={l}
                   equivalente={l.produto_ref_id ? nomeProduto.get(l.produto_ref_id) : undefined}
+                  autor={autor(l)}
                   onClick={() => setAberto(l)}
                 />
               )}
@@ -174,6 +235,7 @@ export function MeusPrecosPage({ perfil, produtos, cadastros, lancamentos, onAlt
           perfil={perfil}
           produtos={produtos}
           cadastros={cadastros}
+          autor={autor(aberto)}
           onFechar={() => setAberto(null)}
           onAlterado={(novo) => {
             onAlterado(novo);
