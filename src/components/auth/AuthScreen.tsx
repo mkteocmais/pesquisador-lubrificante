@@ -61,28 +61,29 @@ export function AuthScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-page text-ink flex flex-col md:flex-row font-sans">
-      {/* Painel da marca no degradê azul do site da Evora (no celular ocupa o
-          topo; no computador vira a coluna da esquerda). */}
-      <div className="relative flex-1 md:flex-[1.1] min-h-[40vh] md:min-h-screen overflow-hidden bg-gradient-to-b from-brand-dark to-[#0A3CA6]">
-        <div className="relative h-full flex flex-col justify-between p-6 md:p-12 pt-[max(env(safe-area-inset-top),1.5rem)] text-white">
-          <Logo branco className="h-24 md:h-36 w-auto self-start" />
-          <div className="py-8 md:py-0 max-w-md space-y-3">
-            <Sobretitulo className="text-white/70">Pesquisa de preços</Sobretitulo>
-            <h1 className="font-titulo text-[28px] md:text-[40px] font-extrabold uppercase leading-[1.15]">
+    <div className="min-h-screen bg-surface text-ink flex flex-col md:flex-row font-sans border-t-[5px] border-brand">
+      {/* A identidade vem primeiro: logo colorido da Evora sobre fundo branco,
+          como no cabeçalho do site (no celular ocupa o topo; no computador
+          vira a coluna da esquerda). */}
+      <div className="md:flex-[1.1] md:min-h-screen bg-surface">
+        <div className="h-full flex flex-col justify-between gap-8 px-6 md:p-12 pt-[max(env(safe-area-inset-top),2rem)] pb-8">
+          <Logo className="h-20 md:h-28 w-auto self-start" />
+          <div className="max-w-md space-y-3">
+            <Sobretitulo className="text-muted">Pesquisa de preços</Sobretitulo>
+            <h1 className="font-titulo text-[26px] md:text-[40px] font-extrabold uppercase leading-[1.15] text-brand-dark">
               Performance a serviço de todos!
             </h1>
             <Divisor />
-            <p className="pt-2 text-sm md:text-base text-white/80 max-w-sm">
+            <p className="pt-2 text-sm md:text-base text-muted max-w-sm">
               Lance os preços que você pesquisa e veja na hora como eles se comparam com o mercado.
             </p>
           </div>
-          <p className="hidden md:block text-xs text-white/60">Marketing · Inteligência de Mercado</p>
+          <p className="hidden md:block text-xs text-muted">Marketing · Inteligência de Mercado</p>
         </div>
       </div>
 
-      <div className="relative md:flex-1 md:flex md:items-center md:justify-center">
-        <div className="relative -mt-8 md:mt-0 bg-surface rounded-t-xl md:rounded-lg md:border md:border-line px-6 pt-7 pb-[max(env(safe-area-inset-bottom),1.5rem)] md:p-10 w-full md:max-w-md animate-in slide-in-from-bottom-4 duration-500">
+      <div className="flex-1 bg-surface md:bg-page border-t border-line md:border-t-0 md:border-l md:flex md:items-center md:justify-center">
+        <div className="bg-surface md:border md:border-line md:rounded-lg px-6 pt-7 pb-[max(env(safe-area-inset-bottom),1.5rem)] md:p-10 w-full md:max-w-md animate-in fade-in duration-500">
           <h2 className="font-titulo text-xl font-extrabold uppercase">Entrar</h2>
           <p className="text-sm text-muted mt-1">Use o e-mail e a senha que você recebeu.</p>
 
