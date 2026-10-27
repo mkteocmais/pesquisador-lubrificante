@@ -32,6 +32,14 @@ interface Props {
 
 const OUTRO = "__outro__";
 
+interface ProdutoComMarca {
+  produto: CadProduto;
+  marca: string;
+}
+
+// Só imagem: o Storage também recusa outros tipos (JPG, PNG, WEBP).
+const ehImagem = (f: File) => f.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name);
+
 // Valor salvo que não está na lista vira "Outro" + texto livre.
 function separarOutro(valor: string | null | undefined, lista: string[]): [string, string] {
   if (!valor) return ["", ""];
@@ -129,13 +137,37 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
     return [...ativas, ...MARCAS_BASE.filter((m) => !ja.has(chaveTexto(m)))].map((rotulo) => ({ rotulo }));
   }, [cadastros.marcas]);
 
-  const itensProduto = useMemo<ItemAuto<CadProduto>[]>(() => {
+  // Produtos de todas as marcas, com a marca no detalhe. Os da marca já
+  // escolhida vêm primeiro; os outros continuam aparecendo, porque o mesmo
+  // nome pode existir em marcas diferentes e a marca pode estar errada.
+  const itensProduto = useMemo<ItemAuto<ProdutoComMarca>[]>(() => {
     const k = chaveTexto(marca);
-    const idsMarca = new Set(cadastros.marcas.filter((m) => m.ativo && chaveTexto(m.nome) === k).map((m) => m.id));
+    const nomeMarca = new Map(cadastros.marcas.filter((m) => m.ativo).map((m) => [m.id, m.nome]));
     return cadastros.produtos
-      .filter((p) => p.ativo && idsMarca.has(p.marca_id))
-      .map((p) => ({ rotulo: p.nome, detalhe: [p.viscosidade, p.desempenho].filter(Boolean).join(" · ") || undefined, dados: p }));
+      .filter((p) => p.ativo && nomeMarca.has(p.marca_id))
+      .map((p) => {
+        const m = nomeMarca.get(p.marca_id) ?? "";
+        return {
+          rotulo: p.nome,
+          detalhe: [m, p.viscosidade, p.desempenho].filter(Boolean).join(" · "),
+          dados: { produto: p, marca: m },
+          grupo: k && chaveTexto(m) === k ? 0 : 1,
+        };
+      });
   }, [cadastros.marcas, cadastros.produtos, marca]);
+  const marcaTemProdutos = itensProduto.some((i) => i.grupo === 0);
+
+  // Especificações comuns + as que já estão nos produtos do cadastro.
+  const itensDesempenho = useMemo<ItemAuto[]>(() => {
+    const vistos = new Set<string>();
+    const lista: string[] = [];
+    for (const d of [...DESEMPENHOS, ...cadastros.produtos.flatMap((p) => separarDesempenho(p.desempenho))]) {
+      if (vistos.has(chaveTexto(d))) continue;
+      vistos.add(chaveTexto(d));
+      lista.push(d);
+    }
+    return lista.map((rotulo) => ({ rotulo }));
+  }, [cadastros.produtos]);
 
   const itensEmbalagem = useMemo<ItemAuto[]>(() => EMBALAGENS.map((e) => ({ rotulo: e.nome })), []);
 
@@ -145,10 +177,13 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
     if (item.dados?.uf) setEstado(item.dados.uf);
   };
 
-  const escolherProduto = (item: ItemAuto<CadProduto>) => {
-    // Produto do cadastro: aproveita viscosidade e desempenho se ainda vazios.
-    const p = item.dados;
-    if (!p) return;
+  const escolherProduto = (item: ItemAuto<ProdutoComMarca>, automatico: boolean) => {
+    if (!item.dados) return;
+    const { produto: p, marca: m } = item.dados;
+    // Escolheu da lista: a marca passa a ser a do produto (dá para trocar
+    // depois). Só digitou o nome exato: preenche a marca apenas se vazia.
+    if (m && (automatico ? !marca.trim() : chaveTexto(m) !== chaveTexto(marca))) setMarca(m);
+    // Aproveita viscosidade e desempenho se ainda vazios.
     if (!visc && p.viscosidade) {
       const [sel, outro] = separarOutro(p.viscosidade, TODAS_VISCOSIDADES);
       setVisc(sel);
@@ -201,6 +236,17 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
     }
   };
 
+  const escolherFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    // Permite escolher o mesmo arquivo de novo depois de um erro.
+    e.target.value = "";
+    if (f && !ehImagem(f)) {
+      showError("Esse arquivo não é uma imagem. Envie só fotos (JPG, PNG); Excel e PDF não são aceitos.");
+      return;
+    }
+    if (f) setFoto(f);
+  };
+
   const erro = (cond: boolean) => (tentou && cond ? " border-rose-400 focus:border-rose-500" : "");
   const fotoAtual = fotoPreview ?? inicial?.foto_url ?? null;
 
@@ -208,8 +254,8 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
     <form onSubmit={salvar} className="space-y-6" noValidate>
       {/* Foto da etiqueta/gôndola: opcional, ajuda a conferir depois. */}
       <section className="space-y-3">
-        <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => setFoto(e.target.files?.[0] ?? null)} />
-        <input ref={galeriaRef} type="file" accept="image/*" className="hidden" onChange={(e) => setFoto(e.target.files?.[0] ?? null)} />
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={escolherFoto} />
+        <input ref={galeriaRef} type="file" accept="image/*" className="hidden" onChange={escolherFoto} />
         {fotoAtual ? (
           <div className="relative rounded-lg overflow-hidden border border-line bg-sunken">
             <img src={fotoAtual} alt="Foto do produto pesquisado" className="w-full max-h-64 object-contain" />
@@ -243,7 +289,9 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
             </button>
           </div>
         )}
-        {!fotoAtual && <p className="text-xs text-muted text-center">A foto é opcional.</p>}
+        {!fotoAtual && (
+          <p className="text-xs text-muted text-center">Insira apenas arquivos de imagem. Não são permitidos arquivos em Excel ou PDF.</p>
+        )}
       </section>
 
       <section className="space-y-4">
@@ -295,13 +343,13 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
             className={theme.input + erro(!marca.trim())}
           />
         </Campo>
-        <Campo label="Nome do produto">
+        <Campo label="Nome do produto" dica="Pode começar por aqui: ao escolher um produto da lista, a marca vem junto.">
           <Autocompletar
             value={produto}
             onChange={setProduto}
             itens={itensProduto}
             onEscolher={escolherProduto}
-            mostrarVazio={itensProduto.length > 0}
+            mostrarVazio={marcaTemProdutos}
             placeholder="Ex: Essencial CI-4, Rimula R4..."
             ariaLabel="Nome do produto"
             className={theme.input + erro(!produto.trim())}
@@ -324,13 +372,15 @@ export function LancamentoForm({ perfil, produtos, cadastros, inicial, local, on
           )}
         </Campo>
         <Campo label="Desempenho" htmlFor="f-desemp" dica="Especificações do rótulo. Toque para marcar ou digite separando por vírgula.">
-          <input
+          <Autocompletar
             id="f-desemp"
-            autoComplete="off"
-            className={theme.input}
-            placeholder="Ex: API SP, ACEA C3, DEXOS 1 Gen 3"
+            multiplo
             value={desempenho}
-            onChange={(e) => setDesempenho(e.target.value)}
+            onChange={setDesempenho}
+            itens={itensDesempenho}
+            placeholder="Ex: API SP, ACEA C3, DEXOS 1 Gen 3"
+            ariaLabel="Desempenho"
+            className={theme.input}
             maxLength={200}
           />
           <div className="flex flex-wrap gap-1.5 pt-1">
