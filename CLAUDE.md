@@ -35,7 +35,7 @@ src/
   components/meus/            lista e detalhe dos lançamentos do vendedor + ranking de envios
   components/equivalencias/   base de equivalências para consulta de todos (sem preço)
   components/painel/          administrador: lançamentos + Excel, equivalências, cadastros (com duplicados parecidos), vendedores
-  components/common/          Autocompletar (com "Você quis dizer?"), ListaRolavel (50 por vez, rolagem própria)
+  components/common/          Autocompletar (5 sugestões, começo de palavra primeiro, "Você quis dizer?", aceita nome novo), ListaRolavel (50 por vez, rolagem própria)
   utils/similaridade.ts       similaridade de nomes (trigramas) para sugestões e duplicados
   utils/options.ts            viscosidades, fluxos de venda, embalagens (com volume), UFs
   utils/exportar.ts           monta a planilha (Lançamentos, Equivalências, Resumo de preços)
@@ -77,6 +77,7 @@ supabase/migrations/          histórico do schema (fonte da verdade)
 
 - Iguais às do Juntto: componentes funcionais, sem bibliotecas novas sem necessidade, `autoComplete="off"` nos campos, `placeholder` em vez de valor de exemplo, `inputMode="decimal"` em valores.
 - Erros sempre via `useToast()` com `mensagemErro()`; nunca mostre o erro cru do Supabase.
+- **Formulário de lançamento (vendedor na rua):** Empresa, Marca, Nome do produto, Desempenho e Embalagem usam `Autocompletar`, que nunca obriga a escolher da lista. O produto busca em todas as marcas (os da marca escolhida primeiro) e, ao ser escolhido, traz a marca; o mesmo nome pode existir em marcas diferentes, então digitar o nome exato só preenche a marca se ela estiver vazia. Foto: só imagem (o bucket aceita JPG, PNG e WEBP).
 - **Identidade da Evora Lubrificantes** (evoralub.com.br): azul Evora `#003CA6` (`brand`, escuro `#002971`), vermelho Evora `#BA1928` (`accent`, só em marcadores e destaques), texto grafite `#131E25`. Tokens em `tailwind.config.js` e `src/utils/theme.ts`.
 - Fontes do site, servidas pelo app via `@fontsource`: Roboto (texto), Open Sans 800 em caixa alta (títulos, `font-titulo`) e Roboto Condensed espaçada (sobretítulos, `font-condensado`). Cantos quase retos (`rounded-md`/`rounded-lg`).
 - Logo, escudo e ícones em `public/` (`evora-logo.svg`, `evora-logo-branco.png`, `evora-escudo.svg`); componentes de marca em `components/common/Marca.tsx` (`Logo`, `Sobretitulo`, `Divisor`, `TituloPagina`).
